@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MUN — Committee Control</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Jost:wght@300;400;500&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ─── CSS Variables ─────────────────────────────────────── */
+    :root {
+      --parchment:    #f5f0e8;
+      --parchment-dk: #ede5d0;
+      --maroon:       #6b1a2a;
+      --maroon-lt:    #8c2236;
+      --gold:         #b8973a;
+      --gold-lt:      #d4af5a;
+      --ink:          #2c1a10;
+      --ink-lt:       #5a3e28;
+      --smoke:        #8a7968;
+      --green:        #2e7d4f;
+      --white:        #fff;
+      --shadow:       rgba(107,26,42,0.12);
+
+      --ff-serif: 'Cormorant Garamond', Georgia, serif;
+      --ff-sans:  'Jost', sans-serif;
+
+      --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    /* ─── Reset & Base ──────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      min-height: 100vh;
+      background-color: var(--parchment);
+      background-image:
+        radial-gradient(ellipse 80% 50% at 50% -10%, rgba(107,26,42,0.08) 0%, transparent 70%),
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.025'/%3E%3C/svg%3E");
+      font-family: var(--ff-sans);
+      color: var(--ink);
+    }
+
+    /* ─── Screen System ─────────────────────────────────────── */
+    .screen { display: none; }
+    .screen.active { display: block; animation: fadeUp 0.5s var(--ease-out) both; }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(18px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ─── Login Page ─────────────────────────────────────────── */
+    #screen-login {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 2rem 1rem;
+    }
+    #screen-login.active { display: flex; }
+
+    /* ─── Layout ─────────────────────────────────────────────── */
+    .admin-layout {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem 4rem;
+    }
+
+    /* ─── Card ──────────────────────────────────────────────── */
+    .card {
+      background: linear-gradient(160deg, #fff 0%, var(--parchment) 100%);
+      border: 1px solid rgba(184,151,58,0.25);
+      border-radius: 4px;
+      padding: 2.5rem;
+      box-shadow: 0 2px 0 rgba(184,151,58,0.15), 0 8px 32px var(--shadow);
+      position: relative;
+      overflow: hidden;
+    }
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; height: 3px;
+      background: linear-gradient(90deg, var(--maroon), var(--gold), var(--maroon));
+    }
+
+    .card-login { max-width: 420px; width: 100%; }
+
+    /* ─── Header ─────────────────────────────────────────────── */
+    .admin-header {
+      border-bottom: 1px solid rgba(184,151,58,0.2);
+      padding-bottom: 1.5rem;
+      margin-bottom: 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .header-left { display: flex; align-items: center; gap: 1rem; }
+    .header-crest svg { width: 36px; height: 36px; opacity: 0.65; }
+
+    .admin-title {
+      font-family: var(--ff-serif);
+      font-size: 1.7rem;
+      font-weight: 400;
+      color: var(--maroon);
+    }
+    .admin-subtitle {
+      font-size: 0.72rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--smoke);
+      font-weight: 300;
+    }
+
+    /* Committee name badge */
+    .committee-badge {
+      background: linear-gradient(135deg, var(--maroon), var(--maroon-lt));
+      color: var(--parchment);
+      font-size: 0.72rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      padding: 0.4rem 0.9rem;
+      border-radius: 2px;
+      font-weight: 400;
+    }
+
+    /* Session mode indicator */
+    .mode-indicator {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.75rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--smoke);
+      margin-top: 0.3rem;
+    }
+    .mode-dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: var(--smoke);
+      transition: background 0.3s;
+    }
+    .mode-dot.idle         { background: var(--smoke); }
+    .mode-dot.rollcall     { background: var(--gold); box-shadow: 0 0 6px rgba(184,151,58,0.5); }
+    .mode-dot.voting       { background: var(--green); box-shadow: 0 0 6px rgba(46,125,79,0.5); }
+    .mode-dot.voting-closed { background: var(--maroon); }
+
+    /* ─── Grid ───────────────────────────────────────────────── */
+    .admin-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+    }
+
+    @media (max-width: 768px) {
+      .admin-grid { grid-template-columns: 1fr; }
+    }
+
+    /* ─── Section Titles ─────────────────────────────────────── */
+    .section-label {
+      font-size: 0.7rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--gold);
+      font-weight: 500;
+      margin-bottom: 1rem;
+    }
+
+    /* ─── Control Buttons ────────────────────────────────────── */
+    .control-grid {
+      display: grid;
+      gap: 0.65rem;
+    }
+
+    .ctrl-btn {
+      padding: 0.9rem 1.2rem;
+      border: 1.5px solid;
+      border-radius: 3px;
+      font-family: var(--ff-sans);
+      font-size: 0.78rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      font-weight: 500;
+      cursor: pointer;
+      background: transparent;
+      text-align: left;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      transition: all 0.2s var(--ease-out);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .ctrl-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    .ctrl-btn:not(:disabled):hover { transform: translateX(3px); }
+
+    .ctrl-btn .btn-icon { font-size: 1rem; }
+
+    .ctrl-btn.start-rc  { border-color: var(--gold);   color: #8a6928; }
+    .ctrl-btn.end-rc    { border-color: var(--smoke);  color: var(--smoke); }
+    .ctrl-btn.start-v   { border-color: var(--green);  color: var(--green); }
+    .ctrl-btn.end-v     { border-color: var(--maroon); color: var(--maroon); }
+    .ctrl-btn.reset     { border-color: var(--ink-lt); color: var(--ink-lt); }
+
+    .ctrl-btn.start-rc:not(:disabled):hover  { background: var(--gold);   color: #fff; }
+    .ctrl-btn.end-rc:not(:disabled):hover    { background: var(--smoke);  color: #fff; }
+    .ctrl-btn.start-v:not(:disabled):hover   { background: var(--green);  color: #fff; }
+    .ctrl-btn.end-v:not(:disabled):hover     { background: var(--maroon); color: #fff; }
+    .ctrl-btn.reset:not(:disabled):hover     { background: var(--ink-lt); color: #fff; }
+
+    /* ─── Stats ──────────────────────────────────────────────── */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .stat-box {
+      background: rgba(255,255,255,0.5);
+      border: 1px solid rgba(184,151,58,0.2);
+      border-radius: 3px;
+      padding: 1rem;
+      text-align: center;
+    }
+    .stat-value {
+      font-family: var(--ff-serif);
+      font-size: 2.2rem;
+      font-weight: 400;
+      color: var(--maroon);
+      line-height: 1;
+    }
+    .stat-label {
+      font-size: 0.68rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--smoke);
+      margin-top: 0.3rem;
+    }
+
+    .vote-stats-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 0.65rem;
+      margin-bottom: 1.5rem;
+    }
+    .vote-stat { text-align: center; padding: 0.9rem 0.5rem; border-radius: 3px; border: 1px solid; }
+    .vote-stat.yes  { border-color: rgba(46,125,79,0.3);  background: rgba(46,125,79,0.06); }
+    .vote-stat.no   { border-color: rgba(107,26,42,0.3);  background: rgba(107,26,42,0.06); }
+    .vote-stat.abs  { border-color: rgba(184,151,58,0.3); background: rgba(184,151,58,0.06); }
+    .vote-stat .sv  { font-family: var(--ff-serif); font-size: 1.9rem; font-weight: 400; }
+    .vote-stat.yes .sv  { color: var(--green); }
+    .vote-stat.no .sv   { color: var(--maroon); }
+    .vote-stat.abs .sv  { color: #8a6928; }
+    .vote-stat .sl  { font-size: 0.65rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--smoke); }
+
+    /* ─── Delegate Table ─────────────────────────────────────── */
+    .delegate-list {
+      max-height: 340px;
+      overflow-y: auto;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(184,151,58,0.3) transparent;
+    }
+
+    .delegate-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.6rem 0.75rem;
+      border-bottom: 1px solid rgba(184,151,58,0.1);
+      animation: rowIn 0.3s var(--ease-out) both;
+      font-size: 0.85rem;
+    }
+    @keyframes rowIn {
+      from { opacity: 0; transform: translateX(-8px); }
+      to   { opacity: 1; transform: translateX(0); }
+    }
+
+    .delegate-row:last-child { border-bottom: none; }
+
+    .d-name { font-weight: 400; color: var(--ink); }
+    .d-phone { font-size: 0.7rem; color: var(--smoke); }
+
+    .d-badge {
+      font-size: 0.65rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      padding: 0.25rem 0.55rem;
+      border-radius: 2px;
+      font-weight: 500;
+    }
+    .d-badge.present        { background: rgba(184,151,58,0.15); color: #8a6928; }
+    .d-badge.present_voting { background: rgba(46,125,79,0.15);  color: var(--green); }
+    .d-badge.none           { background: rgba(138,121,104,0.12); color: var(--smoke); }
+
+    .d-vote {
+      font-size: 0.72rem;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      min-width: 55px;
+      text-align: right;
+    }
+    .d-vote.yes     { color: var(--green); }
+    .d-vote.no      { color: var(--maroon); }
+    .d-vote.abstain { color: #8a6928; }
+    .d-vote.none    { color: var(--smoke); }
+
+    /* ─── Ornaments ──────────────────────────────────────────── */
+    .ornament-divider {
+      display: flex; align-items: center; gap: 0.75rem; margin: 1rem 0;
+    }
+    .ornament-divider span { flex: 1; height: 1px; background: linear-gradient(90deg, transparent, rgba(184,151,58,0.3), transparent); }
+    .ornament-divider i    { color: var(--gold); font-style: normal; font-size: 0.55rem; }
+
+    /* ─── Login form typography ─────────────────────────────── */
+    .screen-title {
+      font-family: var(--ff-serif); font-size: 1.9rem; font-weight: 400;
+      color: var(--maroon); text-align: center; margin-bottom: 0.3rem;
+    }
+    .screen-subtitle {
+      font-size: 0.72rem; letter-spacing: 0.18em; text-transform: uppercase;
+      color: var(--smoke); text-align: center; margin-bottom: 1.8rem;
+    }
+    label {
+      display: block; font-size: 0.7rem; letter-spacing: 0.16em;
+      text-transform: uppercase; color: var(--smoke); margin-bottom: 0.45rem;
+    }
+    input[type="tel"] {
+      width: 100%; background: rgba(255,255,255,0.7);
+      border: 1px solid rgba(107,26,42,0.15); border-radius: 3px;
+      padding: 0.85rem 1rem; font-family: var(--ff-sans); font-size: 0.95rem;
+      color: var(--ink); outline: none; transition: border-color 0.2s, box-shadow 0.2s;
+      -webkit-appearance: none;
+    }
+    input:focus { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(184,151,58,0.12); }
+    input::placeholder { color: var(--smoke); opacity: 0.6; }
+
+    .btn-primary {
+      display: block; width: 100%; padding: 1rem; margin-top: 1.5rem;
+      background: linear-gradient(135deg, var(--maroon), var(--maroon-lt));
+      color: var(--parchment); border: none; border-radius: 3px;
+      font-family: var(--ff-sans); font-size: 0.8rem; letter-spacing: 0.2em;
+      text-transform: uppercase; font-weight: 500; cursor: pointer;
+      box-shadow: 0 4px 16px rgba(107,26,42,0.25);
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+    .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 24px rgba(107,26,42,0.35); }
+
+    .error-msg { font-size: 0.8rem; color: var(--maroon); text-align: center; margin-top: 0.75rem; font-style: italic; min-height: 1.2em; }
+
+    /* ─── Ripple ─────────────────────────────────────────────── */
+    .ripple { position: absolute; border-radius: 50%; background: rgba(255,255,255,0.3); transform: scale(0); animation: ripple 0.5s linear; pointer-events: none; }
+    @keyframes ripple { to { transform: scale(4); opacity: 0; } }
+
+    /* ─── Responsive ─────────────────────────────────────────── */
+    @media (max-width: 600px) {
+      .admin-layout { padding: 1rem 1rem 3rem; }
+      .card { padding: 1.5rem; }
+      .stats-grid { grid-template-columns: 1fr 1fr; }
+      .admin-header { flex-direction: column; align-items: flex-start; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ══════════════════════════════════════════════════════════
+       SCREEN 1 — ADMIN LOGIN
+  ══════════════════════════════════════════════════════════════ -->
+  <div class="screen active" id="screen-login">
+    <div style="display:flex;align-items:center;justify-content:center;min-height:100vh;padding:2rem 1rem;">
+      <div class="card card-login">
+        <div style="text-align:center;margin-bottom:1.5rem;">
+          <svg width="40" height="40" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" style="opacity:0.65">
+            <circle cx="32" cy="32" r="28" stroke="#b8973a" stroke-width="1.5" stroke-dasharray="3 3"/>
+            <circle cx="32" cy="32" r="18" stroke="#6b1a2a" stroke-width="1"/>
+            <path d="M32 14 C32 14 22 22 22 32 C22 42 32 50 32 50 C32 50 42 42 42 32 C42 22 32 14 32 14Z" stroke="#6b1a2a" stroke-width="1" fill="none"/>
+            <path d="M14 32 C14 32 22 22 32 22 C42 22 50 32 50 32 C50 32 42 42 32 42 C22 42 14 32 14 32Z" stroke="#6b1a2a" stroke-width="1" fill="none"/>
+            <circle cx="32" cy="32" r="3" fill="#b8973a"/>
+          </svg>
+        </div>
+        <h1 class="screen-title">Committee Control</h1>
+        <p class="screen-subtitle">Administrator Access</p>
+
+        <div class="ornament-divider"><span></span><i>✦</i><span></span></div>
+
+        <div style="margin-bottom:1.2rem;">
+          <label for="admin-phone">Admin Phone Number</label>
+          <input type="tel" id="admin-phone" placeholder="Registered admin number" />
+        </div>
+
+        <div class="error-msg" id="admin-error"></div>
+        <button class="btn-primary" id="btn-admin-login" onclick="handleAdminLogin()">
+          Enter Control Panel
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════
+       SCREEN 2 — ADMIN PANEL
+  ══════════════════════════════════════════════════════════════ -->
+  <div class="screen" id="screen-panel">
+    <div class="admin-layout">
+
+      <!-- Header -->
+      <div class="admin-header">
+        <div class="header-left">
+          <div class="header-crest">
+            <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="32" cy="32" r="28" stroke="#b8973a" stroke-width="1.5" stroke-dasharray="3 3"/>
+              <circle cx="32" cy="32" r="18" stroke="#6b1a2a" stroke-width="1"/>
+              <path d="M32 14 C32 14 22 22 22 32 C22 42 32 50 32 50 C32 50 42 42 42 32 C42 22 32 14 32 14Z" stroke="#6b1a2a" stroke-width="1" fill="none"/>
+              <path d="M14 32 C14 32 22 22 32 22 C42 22 50 32 50 32 C50 32 42 42 32 42 C22 42 14 32 14 32Z" stroke="#6b1a2a" stroke-width="1" fill="none"/>
+              <circle cx="32" cy="32" r="3" fill="#b8973a"/>
+            </svg>
+          </div>
+          <div>
+            <div class="admin-title">Committee Control</div>
+            <div class="mode-indicator">
+              <div class="mode-dot" id="mode-dot"></div>
+              <span id="mode-label">Idle</span>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="committee-badge" id="committee-name-badge">Committee</div>
+          <div class="admin-subtitle" style="text-align:right;margin-top:0.3rem;" id="admin-name-badge">Administrator</div>
+        </div>
+      </div>
+
+      <!-- Main Grid -->
+      <div class="admin-grid">
+
+        <!-- Left: Controls -->
+        <div>
+          <div class="card">
+            <div class="section-label">Session Controls</div>
+            <div class="control-grid">
+              <button class="ctrl-btn start-rc" id="btn-start-rc" onclick="startRollCall()">
+                <span class="btn-icon">📋</span> Initiate Roll Call
+              </button>
+              <button class="ctrl-btn end-rc" id="btn-end-rc" onclick="endRollCall()" disabled>
+                <span class="btn-icon">✓</span> Conclude Roll Call
+              </button>
+              <button class="ctrl-btn start-v" id="btn-start-v" onclick="startVoting()" disabled>
+                <span class="btn-icon">🗳</span> Commence Voting
+              </button>
+              <button class="ctrl-btn end-v" id="btn-end-v" onclick="endVoting()" disabled>
+                <span class="btn-icon">🔒</span> Close Voting
+              </button>
+              <div class="ornament-divider"><span></span><i>✦</i><span></span></div>
+              <button class="ctrl-btn reset" id="btn-reset" onclick="resetSession()">
+                <span class="btn-icon">↺</span> Reset Session
+              </button>
+            </div>
+          </div>
+
+          <!-- Attendance Stats -->
+          <div class="card" style="margin-top:1.5rem;">
+            <div class="section-label">Attendance</div>
+            <div class="stats-grid">
+              <div class="stat-box">
+                <div class="stat-value" id="stat-present">0</div>
+                <div class="stat-label">Present</div>
+              </div>
+              <div class="stat-box">
+                <div class="stat-value" id="stat-pv">0</div>
+                <div class="stat-label">Present &amp; Voting</div>
+              </div>
+            </div>
+
+            <div class="section-label" style="margin-top:0.5rem;">Voting Results</div>
+            <div class="vote-stats-grid">
+              <div class="vote-stat yes">
+                <div class="sv" id="stat-yes">0</div>
+                <div class="sl">Yes</div>
+              </div>
+              <div class="vote-stat no">
+                <div class="sv" id="stat-no">0</div>
+                <div class="sl">No</div>
+              </div>
+              <div class="vote-stat abs">
+                <div class="sv" id="stat-abs">0</div>
+                <div class="sl">Abstain</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Delegate Detail -->
+        <div>
+          <div class="card" style="height:100%;min-height:420px;">
+            <div class="section-label">Delegate Register</div>
+
+            <div class="delegate-list" id="delegate-list">
+              <div style="text-align:center;color:var(--smoke);font-size:0.85rem;padding:2rem;font-style:italic;">
+                No delegates registered yet.
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════
+       Firebase SDK
+  ══════════════════════════════════════════════════════════════ -->
+    <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
+    import { getDatabase, ref, set, get, update, onValue } 
+    from "https://www.gstatic.com/firebasejs/12.11.0/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBmcrIARMXksDd0SD-GJMVY0HidSjS0WZ8",
+      authDomain: "racmun-voting.firebaseapp.com",
+      databaseURL: "https://racmun-voting-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "racmun-voting",
+      storageBucket: "racmun-voting.firebasestorage.app",
+      messagingSenderId: "263791447211",
+      appId: "1:263791447211:web:1e1b5aa814d96521a23bee"
+    };
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    // 🔥 Make Firebase globally usable
+    window.db = db;
+    window.ref = ref;
+    window.set = set;
+    window.get = get;
+    window.update = update;
+    window.onValue = onValue;
+   
+
+    /* ────────────────────────────────────────────────────────────
+       ADMIN LIST — phone → committee name
+       Add all admin phone numbers and their assigned committees.
+    ──────────────────────────────────────────────────────────── */
+    const ADMIN_LIST = {
+      "8888000001": { name: "Chairperson A",  committee: "United Nations Security Council" },
+      "8888000002": { name: "Chairperson B",  committee: "Lok Sabha" },
+      "8888000003": { name: "Director C",     committee: "International Court of Justice" },
+      // … add more
+    };
+
+    /* ────────────────────────────────────────────────────────────
+       Init
+    ──────────────────────────────────────────────────────────── */
+
+
+    let currentAdmin     = null;
+    let currentMode      = "idle";
+    let currentVotingActive = false;
+
+    /* ── Ripple ── */
+    function addRipple(btn, e) {
+      const rect = btn.getBoundingClientRect();
+      const r    = document.createElement("span");
+      const size = Math.max(rect.width, rect.height);
+      r.className = "ripple";
+      r.style.cssText = `width:${size}px;height:${size}px;top:${e.clientY-rect.top-size/2}px;left:${e.clientX-rect.left-size/2}px`;
+      btn.appendChild(r);
+      setTimeout(() => r.remove(), 600);
+    }
+    document.querySelectorAll(".ctrl-btn, .btn-primary").forEach(btn => {
+      btn.addEventListener("click", e => addRipple(btn, e));
+    });
+
+    /* ── Screen switch ── */
+    function showScreen(id) {
+      document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+      document.getElementById(id).classList.add("active");
+    }
+
+    /* ════════════════════════════════════════════════════════════
+       ADMIN LOGIN
+    ════════════════════════════════════════════════════════════ */
+    window.handleAdminLogin = function () {
+      const rawPhone = document.getElementById("admin-phone").value.trim().replace(/\D/g,"");
+      const errEl    = document.getElementById("admin-error");
+      errEl.textContent = "";
+
+      if (!rawPhone) { errEl.textContent = "Please enter your phone number."; return; }
+      if (!ADMIN_LIST[rawPhone]) {
+        errEl.textContent = "Unauthorised. This number is not registered as an admin.";
+        return;
+      }
+
+      currentAdmin = { phone: rawPhone, ...ADMIN_LIST[rawPhone] };
+
+      // Update UI
+      document.getElementById("committee-name-badge").textContent = currentAdmin.committee;
+      document.getElementById("admin-name-badge").textContent     = currentAdmin.name;
+
+      showScreen("screen-panel");
+      initAdminListeners();
+    };
+
+    /* ════════════════════════════════════════════════════════════
+       REAL-TIME LISTENERS
+    ════════════════════════════════════════════════════════════ */
+    function initAdminListeners() {
+      // Write the committee name to session (in case it's new)
+      update(ref(db, `sessions/${currentAdmin.committee}`), { committee: currentAdmin.committee });
+
+      /* ── Session state listener ── */
+      onValue(ref(db, `sessions/${currentAdmin.committee}`), (snap) => {
+        const session = snap.val() || {};
+        currentMode        = session.mode || "idle";
+        currentVotingActive = !!session.votingActive;
+        updateModeUI();
+        updateControlButtons();
+      });
+
+      /* ── Delegates listener ── */
+      onValue(ref(db, `delegates/${currentAdmin.committee}`), (snap) => {
+        const delegates = snap.val() || {};
+        renderDelegates(delegates);
+        updateStats(delegates);
+      });
+    }
+
+    /* ─── Update mode indicator ─── */
+    function updateModeUI() {
+      const dot   = document.getElementById("mode-dot");
+      const label = document.getElementById("mode-label");
+
+      dot.className = "mode-dot";
+
+      if (currentMode === "idle") {
+        dot.classList.add("idle");
+        label.textContent = "Session Idle";
+      } else if (currentMode === "rollcall") {
+        dot.classList.add("rollcall");
+        label.textContent = "Roll Call in Progress";
+      } else if (currentMode === "voting" && currentVotingActive) {
+        dot.classList.add("voting");
+        label.textContent = "Voting Active";
+      } else if (currentMode === "voting" && !currentVotingActive) {
+        dot.classList.add("voting-closed");
+        label.textContent = "Voting Concluded";
+      }
+    }
+
+    /* ─── Enable / disable control buttons based on state ─── */
+    function updateControlButtons() {
+      const idle    = currentMode === "idle";
+      const rc      = currentMode === "rollcall";
+      const voting  = currentMode === "voting";
+      const vActive = currentVotingActive;
+
+      document.getElementById("btn-start-rc").disabled = !idle;
+      document.getElementById("btn-end-rc").disabled   = !rc;
+      document.getElementById("btn-start-v").disabled  = !(idle || rc) || voting;
+      document.getElementById("btn-end-v").disabled    = !(voting && vActive);
+      document.getElementById("btn-reset").disabled    = false; // always available
+    }
+
+    /* ─── Render delegates list ─── */
+    function renderDelegates(delegates) {
+      const el = document.getElementById("delegate-list");
+      const phones = Object.keys(delegates);
+
+      if (phones.length === 0) {
+        el.innerHTML = `<div style="text-align:center;color:var(--smoke);font-size:0.85rem;padding:2rem;font-style:italic;">No delegates registered yet.</div>`;
+        return;
+      }
+
+      el.innerHTML = phones.map((phone, i) => {
+        const d          = delegates[phone];
+        const name = d?.name ? d.name : `Delegate ${phone.slice(-4)}`;
+        const presence   = d.presence || null;
+        const vote       = d.vote || null;
+
+        const presenceBadge = presence
+          ? `<span class="d-badge ${presence}">${presence === "present_voting" ? "P &amp; V" : "Present"}</span>`
+          : `<span class="d-badge none">Absent</span>`;
+
+        const voteEl = vote
+          ? `<span class="d-vote ${vote}">${vote}</span>`
+          : `<span class="d-vote none">—</span>`;
+
+        return `
+          <div class="delegate-row" style="animation-delay:${i*0.03}s">
+            <div>
+              <div class="d-name">${escHtml(name)}</div>
+              <div class="d-phone">·${phone.slice(-4)}</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:0.6rem;">
+              ${presenceBadge}
+              ${voteEl}
+            </div>
+          </div>`;
+      }).join("");
+    }
+
+    /* ─── Update aggregated stats ─── */
+    function updateStats(delegates) {
+      let present = 0, pv = 0, yes = 0, no = 0, abstain = 0;
+
+      Object.values(delegates).forEach(d => {
+        if (d.presence === "present")        present++;
+        if (d.presence === "present_voting") pv++;
+        if (d.vote === "yes")     yes++;
+        if (d.vote === "no")      no++;
+        if (d.vote === "abstain") abstain++;
+      });
+
+      document.getElementById("stat-present").textContent = present;
+      document.getElementById("stat-pv").textContent      = pv;
+      document.getElementById("stat-yes").textContent     = yes;
+      document.getElementById("stat-no").textContent      = no;
+      document.getElementById("stat-abs").textContent     = abstain;
+    }
+
+    /* ─── Escape helper ─── */
+    function escHtml(str) {
+      return str.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+    }
+
+    /* ════════════════════════════════════════════════════════════
+       SESSION CONTROL ACTIONS
+    ════════════════════════════════════════════════════════════ */
+
+    window.startRollCall = async function () {
+      await update(ref(db, `sessions/${currentAdmin.committee}`), {
+        mode: "rollcall",
+        votingActive: false,
+        committee: currentAdmin.committee
+      });
+    };
+
+    window.endRollCall = async function () {
+      await update(ref(db, `sessions/${currentAdmin.committee}`), {
+        mode: "idle",
+        votingActive: false
+      });
+    };
+
+    window.startVoting = async function () {
+      // Reset votes before opening voting
+      const snap = await get(ref(db, `delegates/${currentAdmin.committee}`));
+      const delegates = snap.val() || {};
+      const updates   = {};
+      Object.keys(delegates).forEach(phone => {
+        updates[`delegates/${currentAdmin.committee}/${phone}/vote`] = null;
+      });
+      await update(ref(db), updates);
+
+      await update(ref(db, `sessions/${currentAdmin.committee}`), {
+        mode: "voting",
+        votingActive: true,
+        committee: currentAdmin.committee
+      });
+    };
+
+    window.endVoting = async function () {
+      await update(ref(db, `sessions/${currentAdmin.committee}`), { votingActive: false });
+    };
+
+    window.resetSession = async function () {
+      const confirmed = confirm("Reset the session? This will clear all presence and vote data for this round.");
+      if (!confirmed) return;
+
+      // Clear all delegate presence & votes (keep names)
+      const snap = await get(ref(db, `delegates/${currentAdmin.committee}`));
+      const delegates = snap.val() || {};
+      const updates   = {};
+      Object.keys(delegates).forEach(phone => {
+        updates[`delegates/${phone}/presence`] = null;
+        updates[`delegates/${phone}/vote`]     = null;
+      });
+      await update(ref(db), updates);
+
+      // Reset session mode
+      await set(ref(db, `sessions/${currentAdmin.committee}`), {
+        mode: "idle",
+        votingActive: false,
+        committee: currentAdmin.committee
+      });
+    };
+  </script>
+</body>
+</html>

@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MUN — Committee Session</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Jost:wght@300;400;500&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ─── CSS Variables ─────────────────────────────────────── */
+    :root {
+      --parchment:    #f5f0e8;
+      --parchment-dk: #ede5d0;
+      --maroon:       #6b1a2a;
+      --maroon-lt:    #8c2236;
+      --gold:         #b8973a;
+      --gold-lt:      #d4af5a;
+      --ink:          #2c1a10;
+      --ink-lt:       #5a3e28;
+      --smoke:        #8a7968;
+      --white:        #fff;
+      --shadow:       rgba(107,26,42,0.12);
+      --shadow-deep:  rgba(44,26,16,0.18);
+
+      --ff-serif: 'Cormorant Garamond', Georgia, serif;
+      --ff-sans:  'Jost', sans-serif;
+
+      --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+      --ease-in:  cubic-bezier(0.4, 0, 1, 1);
+    }
+
+    /* ─── Reset & Base ──────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { height: 100%; }
+
+    body {
+      min-height: 100%;
+      background-color: var(--parchment);
+      background-image:
+        radial-gradient(ellipse 80% 60% at 50% 0%, rgba(184,151,58,0.10) 0%, transparent 70%),
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+      font-family: var(--ff-sans);
+      color: var(--ink);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem 1rem;
+    }
+
+    /* ─── Screen System ─────────────────────────────────────── */
+    .screen {
+      display: none;
+      width: 100%;
+      max-width: 480px;
+      animation: fadeUp 0.55s var(--ease-out) both;
+    }
+    .screen.active { display: block; }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(22px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ─── Card ──────────────────────────────────────────────── */
+    .card {
+      background: linear-gradient(160deg, #fff 0%, var(--parchment) 100%);
+      border: 1px solid rgba(184,151,58,0.25);
+      border-radius: 4px;
+      padding: 3rem 2.5rem;
+      box-shadow:
+        0 2px 0 rgba(184,151,58,0.15),
+        0 8px 32px var(--shadow),
+        0 32px 80px rgba(44,26,16,0.08);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--maroon), var(--gold), var(--maroon));
+    }
+
+    /* ─── Crest / Ornament ───────────────────────────────────── */
+    .crest {
+      text-align: center;
+      margin-bottom: 1.5rem;
+    }
+    .crest svg {
+      width: 42px; height: 42px;
+      opacity: 0.7;
+    }
+
+    /* ─── Typography ─────────────────────────────────────────── */
+    .screen-title {
+      font-family: var(--ff-serif);
+      font-size: 2rem;
+      font-weight: 400;
+      letter-spacing: 0.02em;
+      color: var(--maroon);
+      text-align: center;
+      line-height: 1.2;
+      margin-bottom: 0.5rem;
+    }
+
+    .screen-subtitle {
+      font-family: var(--ff-sans);
+      font-size: 0.78rem;
+      font-weight: 300;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--smoke);
+      text-align: center;
+      margin-bottom: 2.2rem;
+    }
+
+    .screen-lead {
+      font-family: var(--ff-serif);
+      font-size: 1.25rem;
+      font-weight: 300;
+      font-style: italic;
+      color: var(--ink-lt);
+      text-align: center;
+      margin-bottom: 1.8rem;
+      line-height: 1.5;
+    }
+
+    .status-text {
+      font-family: var(--ff-serif);
+      font-size: 1rem;
+      font-weight: 300;
+      font-style: italic;
+      color: var(--smoke);
+      text-align: center;
+      margin-top: 1.5rem;
+      letter-spacing: 0.02em;
+    }
+
+    /* ─── Divider ────────────────────────────────────────────── */
+    .ornament-divider {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin: 1.5rem 0;
+    }
+    .ornament-divider span {
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(184,151,58,0.4), transparent);
+    }
+    .ornament-divider i { color: var(--gold); font-style: normal; font-size: 0.6rem; }
+
+    /* ─── Form ───────────────────────────────────────────────── */
+    .field {
+      margin-bottom: 1.2rem;
+    }
+    label {
+      display: block;
+      font-size: 0.72rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--smoke);
+      margin-bottom: 0.5rem;
+      font-weight: 400;
+    }
+    input[type="text"],
+    input[type="tel"] {
+      width: 100%;
+      background: rgba(255,255,255,0.7);
+      border: 1px solid rgba(107,26,42,0.15);
+      border-radius: 3px;
+      padding: 0.85rem 1rem;
+      font-family: var(--ff-sans);
+      font-size: 0.95rem;
+      color: var(--ink);
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      -webkit-appearance: none;
+    }
+    input:focus {
+      border-color: var(--gold);
+      box-shadow: 0 0 0 3px rgba(184,151,58,0.12);
+    }
+    input::placeholder { color: var(--smoke); opacity: 0.6; }
+
+    /* ─── Error Message ─────────────────────────────────────── */
+    .error-msg {
+      font-size: 0.8rem;
+      color: var(--maroon);
+      text-align: center;
+      margin-top: 0.75rem;
+      font-style: italic;
+      min-height: 1.2em;
+    }
+
+    /* ─── Buttons ────────────────────────────────────────────── */
+    .btn {
+      display: block;
+      width: 100%;
+      padding: 1rem;
+      border: none;
+      border-radius: 3px;
+      font-family: var(--ff-sans);
+      font-size: 0.82rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      font-weight: 500;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.15s var(--ease-out), box-shadow 0.15s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .btn:active { transform: scale(0.97); }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--maroon), var(--maroon-lt));
+      color: var(--parchment);
+      box-shadow: 0 4px 16px rgba(107,26,42,0.25);
+      margin-top: 1.5rem;
+    }
+    .btn-primary:hover {
+      box-shadow: 0 6px 24px rgba(107,26,42,0.35);
+      transform: translateY(-1px);
+    }
+
+    .vote-buttons {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 0.75rem;
+      margin-top: 1.8rem;
+    }
+
+    .vote-btn {
+      padding: 1.2rem 0.5rem;
+      border: 1.5px solid;
+      border-radius: 3px;
+      font-family: var(--ff-sans);
+      font-size: 0.75rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      font-weight: 500;
+      cursor: pointer;
+      background: transparent;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.2s var(--ease-out);
+      -webkit-tap-highlight-color: transparent;
+    }
+    .vote-btn:disabled { cursor: not-allowed; opacity: 0.45; }
+    .vote-btn:not(:disabled):hover { transform: translateY(-2px); }
+
+    .vote-btn.yes  { border-color: #2e7d4f; color: #2e7d4f; }
+    .vote-btn.no   { border-color: var(--maroon); color: var(--maroon); }
+    .vote-btn.abs  { border-color: var(--gold); color: #8a6928; }
+
+    .vote-btn.yes.selected  { background: #2e7d4f; color: #fff; box-shadow: 0 4px 16px rgba(46,125,79,0.3); }
+    .vote-btn.no.selected   { background: var(--maroon); color: #fff; box-shadow: 0 4px 16px rgba(107,26,42,0.3); }
+    .vote-btn.abs.selected  { background: var(--gold); color: #fff; box-shadow: 0 4px 16px rgba(184,151,58,0.3); }
+
+    .rc-buttons {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+      margin-top: 1.8rem;
+    }
+    .rc-btn {
+      padding: 1.1rem 0.5rem;
+      border: 1.5px solid var(--maroon);
+      border-radius: 3px;
+      font-family: var(--ff-sans);
+      font-size: 0.75rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      font-weight: 500;
+      cursor: pointer;
+      background: transparent;
+      color: var(--maroon);
+      transition: all 0.2s var(--ease-out);
+      -webkit-tap-highlight-color: transparent;
+    }
+    .rc-btn:hover { background: var(--maroon); color: var(--parchment); }
+    .rc-btn.selected { background: var(--maroon); color: var(--parchment); }
+
+    /* ─── Welcome Banner ─────────────────────────────────────── */
+    .welcome-name {
+      font-family: var(--ff-serif);
+      font-size: 1.9rem;
+      font-weight: 500;
+      color: var(--maroon);
+      text-align: center;
+      line-height: 1.2;
+    }
+    .welcome-committee {
+      font-size: 0.75rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--gold);
+      text-align: center;
+      margin-top: 0.4rem;
+      font-weight: 400;
+    }
+
+    /* ─── Ripple Effect ──────────────────────────────────────── */
+    .ripple {
+      position: absolute;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.35);
+      transform: scale(0);
+      animation: ripple 0.5s linear;
+      pointer-events: none;
+    }
+    @keyframes ripple {
+      to { transform: scale(4); opacity: 0; }
+    }
+
+    /* ─── Loading spinner ────────────────────────────────────── */
+    .spinner {
+      width: 24px; height: 24px;
+      border: 2px solid rgba(107,26,42,0.15);
+      border-top-color: var(--maroon);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      margin: 2rem auto;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ─── Responsive ─────────────────────────────────────────── */
+    @media (max-width: 480px) {
+      .card { padding: 2.2rem 1.5rem; }
+      .screen-title { font-size: 1.7rem; }
+      .vote-buttons { gap: 0.5rem; }
+      .vote-btn { padding: 1rem 0.25rem; font-size: 0.7rem; }
+    }
+    /* ─── Committee Selection ─── */
+    .committee-grid {
+      display: grid;
+    gap: 1rem;
+    margin-top: 1.5rem;
+    }
+
+    .committee-card {
+      border: 1.5px solid rgba(107,26,42,0.2);
+      border-radius: 4px;
+      padding: 1.5rem;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.25s var(--ease-out);
+      background: rgba(255,255,255,0.5);
+    }
+
+    .committee-card:hover {
+      transform: translateY(-4px);
+      border-color: var(--gold);
+      box-shadow: 0 8px 24px rgba(184,151,58,0.15);
+    }
+
+    .committee-name {
+      font-family: var(--ff-serif);
+      font-size: 1.4rem;
+      color: var(--maroon);
+    }
+
+    .committee-full {
+      font-size: 0.7rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--smoke);
+      margin-top: 0.3rem;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ══════════════════════════════════════════════════════════
+       SCREEN 1 — LOGIN
+  ══════════════════════════════════════════════════════════════ -->
+  <div class="screen active" id="screen-login">
+    <div class="card">
+      <div class="crest">
+        <!-- Olive branch / UN-style crest SVG -->
+        <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="32" cy="32" r="28" stroke="#b8973a" stroke-width="1.5" stroke-dasharray="3 3"/>
+          <circle cx="32" cy="32" r="18" stroke="#6b1a2a" stroke-width="1"/>
+          <path d="M32 14 C32 14 22 22 22 32 C22 42 32 50 32 50 C32 50 42 42 42 32 C42 22 32 14 32 14Z" stroke="#6b1a2a" stroke-width="1" fill="none"/>
+          <path d="M14 32 C14 32 22 22 32 22 C42 22 50 32 50 32 C50 32 42 42 32 42 C22 42 14 32 14 32Z" stroke="#6b1a2a" stroke-width="1" fill="none"/>
+          <circle cx="32" cy="32" r="3" fill="#b8973a"/>
+        </svg>
+      </div>
+
+      <h1 class="screen-title">Enter the Committee</h1>
+      <p class="screen-subtitle">Model United Nations · Delegate Portal</p>
+
+      <div class="ornament-divider"><span></span><i>✦</i><span></span></div>
+
+      <div class="field">
+        <label for="inp-delegation">Delegation</label>
+        <input type="text" id="inp-delegation" placeholder="e.g. United States of America" />
+      </div>
+      <div class="field">
+        <label for="inp-phone">Phone Number</label>
+        <input type="tel" id="inp-phone" placeholder="Registered number" />
+      </div>
+
+      <div class="error-msg" id="login-error"></div>
+
+      <button class="btn btn-primary" id="btn-login" onclick="handleLogin()">
+        Proceed to Committee
+      </button>
+    </div>
+  </div>
+  <!-- ══════════════════════════════════════════════════════════
+     SCREEN 1.5 — COMMITTEE SELECTION
+  ══════════════════════════════════════════════════════════════ -->
+  <div class="screen" id="screen-committee">
+    <div class="card">
+      <h1 class="screen-title">Select Your Committee</h1>
+      <p class="screen-subtitle">Where will you deliberate?</p>
+
+      <div class="ornament-divider"><span></span><i>✦</i><span></span></div>
+
+      <div class="committee-grid">
+
+        <div class="committee-card" onclick="selectCommittee('United Nations Security Council')">
+          <div class="committee-name">UNSC</div>
+          <div class="committee-full">United Nations Security Council</div>
+        </div>
+
+        <div class="committee-card" onclick="selectCommittee('Lok Sabha')">
+          <div class="committee-name">Lok Sabha</div>
+          <div class="committee-full">Indian Parliament</div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+  <!-- ══════════════════════════════════════════════════════════
+       SCREEN 2 — IDLE (waiting room after login)
+  ══════════════════════════════════════════════════════════════ -->
+  <div class="screen" id="screen-idle">
+    <div class="card">
+      <div class="crest">
+        <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="32" cy="32" r="28" stroke="#b8973a" stroke-width="1.5" stroke-dasharray="3 3"/>
+          <circle cx="32" cy="32" r="18" stroke="#6b1a2a" stroke-width="1"/>
+          <path d="M32 14 C32 14 22 22 22 32 C22 42 32 50 32 50 C32 50 42 42 42 32 C42 22 32 14 32 14Z" stroke="#6b1a2a" stroke-width="1" fill="none"/>
+          <path d="M14 32 C14 32 22 22 32 22 C42 22 50 32 50 32 C50 32 42 42 32 42 C22 42 14 32 14 32Z" stroke="#6b1a2a" stroke-width="1" fill="none"/>
+          <circle cx="32" cy="32" r="3" fill="#b8973a"/>
+        </svg>
+      </div>
+
+      <div class="welcome-name" id="idle-name">—</div>
+      <div class="welcome-committee" id="idle-committee">Committee</div>
+
+      <div class="ornament-divider" style="margin-top:1.5rem;"><span></span><i>✦</i><span></span></div>
+
+      <p class="status-text">Awaiting proceedings…</p>
+      <p class="status-text" style="margin-top:0.5rem;font-size:0.85rem;">The Chair has not yet initiated a session.</p>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════
+       SCREEN 3 — ROLL CALL
+  ══════════════════════════════════════════════════════════════ -->
+  <div class="screen" id="screen-rollcall">
+    <div class="card">
+      <h1 class="screen-title">Roll Call</h1>
+      <p class="screen-subtitle" style="margin-bottom:0.5rem;">is in progress</p>
+
+      <div class="ornament-divider"><span></span><i>✦</i><span></span></div>
+
+      <p class="screen-lead">How do you wish to be recorded?</p>
+
+      <div class="rc-buttons">
+        <button class="rc-btn" id="rc-present" onclick="markPresence('present')">Present</button>
+        <button class="rc-btn" id="rc-present-voting" onclick="markPresence('present_voting')">Present &amp; Voting</button>
+      </div>
+
+      <p class="status-text" id="rc-status" style="display:none;">
+        Recorded. Please await further proceedings.
+      </p>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════
+       SCREEN 4 — VOTING
+  ══════════════════════════════════════════════════════════════ -->
+  <div class="screen" id="screen-voting">
+    <div class="card">
+      <h1 class="screen-title">Voting has<br><em style="font-style:italic;font-weight:300;">Commenced</em></h1>
+      <p class="screen-subtitle">Cast your position</p>
+
+      <div class="ornament-divider"><span></span><i>✦</i><span></span></div>
+
+      <!-- shown if delegate is not eligible -->
+      <p class="screen-lead" id="voting-ineligible" style="display:none; color:var(--smoke);">
+        You are not marked as <em>Present &amp; Voting</em>.<br>
+        You may not participate in this vote.
+      </p>
+
+      <!-- voting buttons (only shown if eligible) -->
+      <div class="vote-buttons" id="voting-btns">
+        <button class="vote-btn yes" onclick="castVote('yes')">Yes</button>
+        <button class="vote-btn no"  onclick="castVote('no')">No</button>
+        <button class="vote-btn abs" onclick="castVote('abstain')">Abstain</button>
+      </div>
+
+      <p class="status-text" id="vote-status"></p>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════
+       SCREEN 5 — VOTE LOCKED (voting closed, awaiting result)
+  ══════════════════════════════════════════════════════════════ -->
+  <div class="screen" id="screen-vote-locked">
+    <div class="card">
+      <div class="crest">
+        <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="32" cy="32" r="28" stroke="#b8973a" stroke-width="1.5" stroke-dasharray="3 3"/>
+          <circle cx="32" cy="32" r="18" stroke="#6b1a2a" stroke-width="1"/>
+          <path d="M32 14 C32 14 22 22 22 32 C22 42 32 50 32 50 C32 50 42 42 42 32 C42 22 32 14 32 14Z" stroke="#6b1a2a" stroke-width="1" fill="none"/>
+          <path d="M14 32 C14 32 22 22 32 22 C42 22 50 32 50 32 C50 32 42 42 32 42 C22 42 14 32 14 32Z" stroke="#6b1a2a" stroke-width="1" fill="none"/>
+          <circle cx="32" cy="32" r="3" fill="#b8973a"/>
+        </svg>
+      </div>
+      <h1 class="screen-title">Voting Concluded</h1>
+      <p class="status-text">Deliberations are underway.<br>Await the Chair's announcement.</p>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════
+       Firebase SDK
+  ══════════════════════════════════════════════════════════════ -->
+    <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
+    import { getDatabase, ref, set, get, update, onValue } 
+    from "https://www.gstatic.com/firebasejs/12.11.0/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBmcrIARMXksDd0SD-GJMVY0HidSjS0WZ8",
+      authDomain: "racmun-voting.firebaseapp.com",
+      databaseURL: "https://racmun-voting-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "racmun-voting",
+      storageBucket: "racmun-voting.firebasestorage.app",
+      messagingSenderId: "263791447211",
+      appId: "1:263791447211:web:1e1b5aa814d96521a23bee"
+    };
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+  
+    // 🔥 Make Firebase globally usable
+    window.db = db;
+    window.ref = ref;
+    window.set = set;
+    window.get = get;
+    window.update = update;
+    window.onValue = onValue;
+
+    /* ────────────────────────────────────────────────────────────
+       ALLOWED DELEGATES — Phone → allowed (name stored in DB on 1st login)
+       Add all delegate phone numbers here.
+    ────────────────────────s──────────────────────────────────── */
+    const ALLOWED_PHONES = [
+      "9999000001",
+      "9999000002",
+      "9999000003",
+      "9999000004",
+      "9999000005",
+      // … add more
+    ];
+
+    /* ────────────────────────────────────────────────────────────
+       Init
+    ──────────────────────────────────────────────────────────── */
+
+    /* Session state */
+    let currentPhone    = null;
+    let currentName     = null;
+    let hasVoted        = false;
+    let hasMarkedRC     = false;
+    let sessionUnsubscribe = null;
+
+    /* ── Utility: ripple effect ── */
+    function addRipple(btn, e) {
+      const rect   = btn.getBoundingClientRect();
+      const r      = document.createElement("span");
+      const size   = Math.max(rect.width, rect.height);
+      r.className  = "ripple";
+      r.style.cssText = `width:${size}px;height:${size}px;top:${e.clientY-rect.top-size/2}px;left:${e.clientX-rect.left-size/2}px`;
+      btn.appendChild(r);
+      setTimeout(() => r.remove(), 600);
+    }
+
+    document.querySelectorAll(".btn, .vote-btn, .rc-btn").forEach(btn => {
+      btn.addEventListener("click", e => addRipple(btn, e));
+    });
+
+    /* ── Screen switcher ── */
+    function showScreen(id) {
+      document.querySelectorAll(".screen").forEach(s => {
+        s.classList.remove("active");
+      });
+      const el = document.getElementById(id);
+      if (el) {
+        el.classList.add("active");
+        // Force re-trigger animation
+        el.style.animation = "none";
+        el.offsetHeight;
+        el.style.animation = "";
+      }
+    }
+    let currentCommittee = null;
+    
+    /* ════════════════════════════════════════════════════════════
+       LOGIN
+    ════════════════════════════════════════════════════════════ */
+    window.handleLogin = async function () {
+      const rawPhone = document.getElementById("inp-phone").value.trim().replace(/\D/g, "");
+      const rawName  = document.getElementById("inp-delegation").value.trim();
+      const errEl    = document.getElementById("login-error");
+
+      errEl.textContent = "";
+
+      // 🚨 Validate phone
+      if (!rawPhone) {
+        errEl.textContent = "Please enter your phone number.";
+        return;
+      }
+
+      if (!ALLOWED_PHONES.includes(rawPhone)) {
+        errEl.textContent = "This number is not registered for this session.";
+        return;
+      }
+       if (!rawName) {
+          errEl.textContent = "Please enter your delegation name.";
+          return;
+        }
+
+      // ✅ STORE VALUES HERE
+      currentPhone = rawPhone;
+      currentName  = rawName;
+      // ✅ NOW go to committee screen
+      showScreen("screen-committee");
+    };
+    window.selectCommittee = async function (committeeName) {
+      currentCommittee = committeeName;
+      const rawPhone = document.getElementById("inp-phone").value.trim().replace(/\D/g, "");
+      const rawName  = document.getElementById("inp-delegation").value.trim();
+
+      currentPhone = rawPhone;
+      currentName  = rawName;
+      const delegateRef = ref(db, `delegates/${currentCommittee}/${currentPhone}`);
+      const snap = await get(delegateRef);
+
+      if (snap.exists()) {
+        const data = snap.val();
+        currentName = data.name || rawName;
+      } else {
+        await set(delegateRef, {
+        name: currentName,
+        presence: null,
+        vote: null
+        });
+      }
+
+      startSessionListener();
+    };
+    /* ════════════════════════════════════════════════════════════
+       SESSION LISTENER — real-time sync
+    ════════════════════════════════════════════════════════════ */
+    function startSessionListener() {
+      const sessionRef = ref(db, `sessions/${currentCommittee}`);
+
+      onValue(sessionRef, async (snap) => {
+        const session = snap.val() || {};
+        const mode    = session.mode || "idle";
+
+        // Update welcome UI
+        document.getElementById("idle-name").textContent      = currentName;
+        document.getElementById("idle-committee").textContent = session.committee || "Committee";
+
+        // Fetch delegate's own data
+        const delegSnap = await get(ref(db, `delegates/${currentCommittee}/${currentPhone}`));
+        const delegData = delegSnap.val() || {};
+
+        if (mode === "idle") {
+          showScreen("screen-idle");
+          return;
+        }
+
+        if (mode === "rollcall") {
+          hasMarkedRC = !!delegData.presence;
+          if (hasMarkedRC) {
+            // Already marked — show confirmation
+            showScreen("screen-rollcall");
+            document.getElementById("rc-status").style.display = "block";
+            document.getElementById("rc-present").disabled = true;
+            document.getElementById("rc-present-voting").disabled = true;
+            if (delegData.presence === "present") {
+              document.getElementById("rc-present").classList.add("selected");
+            } else {
+              document.getElementById("rc-present-voting").classList.add("selected");
+            }
+          } else {
+            // Not yet marked
+            showScreen("screen-rollcall");
+            document.getElementById("rc-status").style.display = "none";
+            document.getElementById("rc-present").disabled = false;
+            document.getElementById("rc-present-voting").disabled = false;
+            document.getElementById("rc-present").classList.remove("selected");
+            document.getElementById("rc-present-voting").classList.remove("selected");
+          }
+          return;
+        }
+
+        if (mode === "voting") {
+          const votingActive = session.votingActive;
+          hasVoted           = !!delegData.vote;
+          const eligible     = delegData.presence === "present_voting";
+
+          if (!votingActive) {
+            // Voting closed
+            showScreen("screen-vote-locked");
+            return;
+          }
+
+          showScreen("screen-voting");
+
+          const ineligibleEl = document.getElementById("voting-ineligible");
+          const btnsEl       = document.getElementById("voting-btns");
+          const statusEl     = document.getElementById("vote-status");
+
+          if (!eligible) {
+            ineligibleEl.style.display = "block";
+            btnsEl.style.display       = "none";
+            statusEl.textContent       = "";
+            return;
+          }
+
+          ineligibleEl.style.display = "none";
+          btnsEl.style.display       = "grid";
+
+          if (hasVoted) {
+            const v = delegData.vote;
+            statusEl.textContent = "Vote recorded. Await the result.";
+            // Highlight & disable
+            document.querySelectorAll(".vote-btn").forEach(b => {
+              b.disabled = true;
+              if ((b.classList.contains("yes") && v === "yes") ||
+                  (b.classList.contains("no")  && v === "no")  ||
+                  (b.classList.contains("abs") && v === "abstain")) {
+                b.classList.add("selected");
+              }
+            });
+          } else {
+            statusEl.textContent = "";
+            document.querySelectorAll(".vote-btn").forEach(b => {
+              b.disabled = false;
+              b.classList.remove("selected");
+            });
+          }
+        }
+      });
+    }
+
+    /* ════════════════════════════════════════════════════════════
+       ROLL CALL
+    ════════════════════════════════════════════════════════════ */
+    window.markPresence = async function (val) {
+      if (!currentPhone || hasMarkedRC) return;
+
+      await update(ref(db, `delegates/${currentCommittee}/${currentPhone}`), { presence: val });
+      hasMarkedRC = true;
+
+      document.getElementById("rc-status").style.display = "block";
+      document.getElementById("rc-present").disabled = true;
+      document.getElementById("rc-present-voting").disabled = true;
+
+      if (val === "present") {
+        document.getElementById("rc-present").classList.add("selected");
+      } else {
+        document.getElementById("rc-present-voting").classList.add("selected");
+      }
+    };
+
+    /* ════════════════════════════════════════════════════════════
+       VOTING
+    ════════════════════════════════════════════════════════════ */
+    window.castVote = async function (val) {
+      if (!currentPhone || hasVoted) return;
+
+      await update(ref(db, `delegates/${currentCommittee}/${currentPhone}`), { vote: val });
+      hasVoted = true;
+
+      document.getElementById("vote-status").textContent = "Vote recorded. Await the result.";
+      document.querySelectorAll(".vote-btn").forEach(b => {
+        b.disabled = true;
+        if ((b.classList.contains("yes") && val === "yes") ||
+            (b.classList.contains("no")  && val === "no")  ||
+            (b.classList.contains("abs") && val === "abstain")) {
+          b.classList.add("selected");
+        }
+      });
+    };
+  </script>
+</body>
+</html>
