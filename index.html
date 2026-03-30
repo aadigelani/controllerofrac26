@@ -375,6 +375,19 @@
       color: var(--smoke);
       margin-top: 0.3rem;
     }
+    .admin-link {
+      font-size: 0.7rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--smoke);
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+
+    .admin-link:hover {
+      color: var(--gold);
+      letter-spacing: 0.18em;
+    }
   </style>
 </head>
 <body>
@@ -415,7 +428,13 @@
         Proceed to Committee
       </button>
     </div>
+    <div style="text-align:center; margin-top:1rem;">
+      <span onclick="window.location.href='admin.html'" style="cursor:pointer; font-size:0.8rem; color:var(--smoke);">
+        ⚙ Admin
+      </span>
+    </div>
   </div>
+    
   <!-- ══════════════════════════════════════════════════════════
      SCREEN 1.5 — COMMITTEE SELECTION
   ══════════════════════════════════════════════════════════════ -->
