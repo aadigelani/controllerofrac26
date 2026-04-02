@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>MUN — Committee Control</title>
+  <title>MUN — Committee Session</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -22,544 +22,398 @@
       --ink-lt:       #5a3e28;
       --smoke:        #8a7968;
       --green:        #2e7d4f;
-      --blue:         #1a4a7a;
       --white:        #fff;
       --shadow:       rgba(107,26,42,0.12);
+      --shadow-deep:  rgba(44,26,16,0.18);
 
       --ff-serif: 'Cormorant Garamond', Georgia, serif;
       --ff-sans:  'Jost', sans-serif;
+
       --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+      --ease-in:  cubic-bezier(0.4, 0, 1, 1);
     }
 
     /* ─── Reset & Base ──────────────────────────────────────── */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { height: 100%; }
 
     body {
-      min-height: 100vh;
+      min-height: 100%;
       background-color: var(--parchment);
       background-image:
-        radial-gradient(ellipse 80% 50% at 50% -10%, rgba(107,26,42,0.08) 0%, transparent 70%),
-        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.025'/%3E%3C/svg%3E");
+        radial-gradient(ellipse 80% 60% at 50% 0%, rgba(184,151,58,0.10) 0%, transparent 70%),
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
       font-family: var(--ff-sans);
       color: var(--ink);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem 1rem;
     }
 
     /* ─── Screen System ─────────────────────────────────────── */
-    .screen { display: none; }
-    .screen.active { display: block; animation: fadeUp 0.5s var(--ease-out) both; }
-    @keyframes fadeUp { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
+    .screen { display: none; width: 100%; max-width: 480px; animation: fadeUp 0.55s var(--ease-out) both; }
+    .screen.active { display: block; }
 
-    #screen-login.active { display: flex; }
-
-    /* ─── Layout ─────────────────────────────────────────────── */
-    #screen-login {
-      align-items: center; justify-content: center;
-      min-height: 100vh; padding: 2rem 1rem;
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(22px); }
+      to   { opacity: 1; transform: translateY(0); }
     }
-    .admin-layout { max-width: 1200px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
 
     /* ─── Card ──────────────────────────────────────────────── */
     .card {
       background: linear-gradient(160deg, #fff 0%, var(--parchment) 100%);
       border: 1px solid rgba(184,151,58,0.25);
       border-radius: 4px;
-      padding: 2.5rem;
-      box-shadow: 0 2px 0 rgba(184,151,58,0.15), 0 8px 32px var(--shadow);
-      position: relative; overflow: hidden;
+      padding: 3rem 2.5rem;
+      box-shadow: 0 2px 0 rgba(184,151,58,0.15), 0 8px 32px var(--shadow), 0 32px 80px rgba(44,26,16,0.08);
+      position: relative;
+      overflow: hidden;
     }
     .card::before {
-      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; height: 3px;
       background: linear-gradient(90deg, var(--maroon), var(--gold), var(--maroon));
     }
-    .card-login { max-width: 420px; width: 100%; }
 
-    /* ─── Header ─────────────────────────────────────────────── */
-    .admin-header {
-      border-bottom: 1px solid rgba(184,151,58,0.2);
-      padding-bottom: 1.5rem; margin-bottom: 2rem;
-      display: flex; align-items: center; justify-content: space-between;
-      gap: 1rem; flex-wrap: wrap;
+    /* ─── Crest ───────────────────────────────────────────── */
+    .crest { text-align: center; margin-bottom: 1.5rem; }
+    .crest svg { width: 42px; height: 42px; opacity: 0.7; }
+
+    /* ─── Typography ─────────────────────────────────────── */
+    .screen-title {
+      font-family: var(--ff-serif); font-size: 2rem; font-weight: 400;
+      letter-spacing: 0.02em; color: var(--maroon); text-align: center;
+      line-height: 1.2; margin-bottom: 0.5rem;
     }
-    .header-left { display: flex; align-items: center; gap: 1rem; }
-    .header-crest svg { width: 36px; height: 36px; opacity: 0.65; }
-    .admin-title { font-family: var(--ff-serif); font-size: 1.7rem; font-weight: 400; color: var(--maroon); }
-    .admin-subtitle { font-size: 0.72rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--smoke); font-weight: 300; }
-    .committee-badge {
-      background: linear-gradient(135deg, var(--maroon), var(--maroon-lt));
-      color: var(--parchment); font-size: 0.72rem; letter-spacing: 0.15em;
-      text-transform: uppercase; padding: 0.4rem 0.9rem; border-radius: 2px; font-weight: 400;
+    .screen-subtitle {
+      font-family: var(--ff-sans); font-size: 0.78rem; font-weight: 300;
+      letter-spacing: 0.18em; text-transform: uppercase; color: var(--smoke);
+      text-align: center; margin-bottom: 2.2rem;
     }
-    .mode-indicator { display: flex; align-items: center; gap: 0.5rem; font-size: 0.75rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--smoke); margin-top: 0.3rem; }
-    .mode-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--smoke); transition: background 0.3s; }
-    .mode-dot.idle          { background: var(--smoke); }
-    .mode-dot.rollcall      { background: var(--gold); box-shadow: 0 0 6px rgba(184,151,58,0.5); }
-    .mode-dot.voting        { background: var(--green); box-shadow: 0 0 6px rgba(46,125,79,0.5); }
-    .mode-dot.voting-closed { background: var(--maroon); }
-    .mode-dot.speakers      { background: var(--blue); box-shadow: 0 0 6px rgba(26,74,122,0.5); }
-
-    /* ─── Main Grid ──────────────────────────────────────────── */
-    .admin-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
-    .admin-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.5rem; margin-top: 1.5rem; }
-    @media (max-width: 900px) { .admin-grid, .admin-grid-3 { grid-template-columns: 1fr; } }
-
-    /* ─── Section Titles ─────────────────────────────────────── */
-    .section-label { font-size: 0.7rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold); font-weight: 500; margin-bottom: 1rem; }
-
-    /* ─── Control Buttons ────────────────────────────────────── */
-    .control-grid { display: grid; gap: 0.65rem; }
-    .ctrl-btn {
-      padding: 0.9rem 1.2rem; border: 1.5px solid; border-radius: 3px;
-      font-family: var(--ff-sans); font-size: 0.78rem; letter-spacing: 0.15em;
-      text-transform: uppercase; font-weight: 500; cursor: pointer;
-      background: transparent; text-align: left;
-      display: flex; align-items: center; gap: 0.6rem;
-      transition: all 0.2s var(--ease-out);
-      position: relative; overflow: hidden;
+    .screen-lead {
+      font-family: var(--ff-serif); font-size: 1.25rem; font-weight: 300;
+      font-style: italic; color: var(--ink-lt); text-align: center;
+      margin-bottom: 1.8rem; line-height: 1.5;
     }
-    .ctrl-btn:disabled { opacity: 0.4; cursor: not-allowed; }
-    .ctrl-btn:not(:disabled):hover { transform: translateX(3px); }
-    .ctrl-btn .btn-icon { font-size: 1rem; }
-
-    .ctrl-btn.start-rc  { border-color: var(--gold);   color: #8a6928; }
-    .ctrl-btn.end-rc    { border-color: var(--smoke);  color: var(--smoke); }
-    .ctrl-btn.start-v   { border-color: var(--green);  color: var(--green); }
-    .ctrl-btn.end-v     { border-color: var(--maroon); color: var(--maroon); }
-    .ctrl-btn.reset     { border-color: var(--ink-lt); color: var(--ink-lt); }
-    .ctrl-btn.speakers-on  { border-color: var(--blue); color: var(--blue); }
-    .ctrl-btn.speakers-off { border-color: var(--smoke); color: var(--smoke); }
-    .ctrl-btn.download  { border-color: var(--green); color: var(--green); }
-
-    .ctrl-btn.start-rc:not(:disabled):hover  { background: var(--gold);   color: #fff; }
-    .ctrl-btn.end-rc:not(:disabled):hover    { background: var(--smoke);  color: #fff; }
-    .ctrl-btn.start-v:not(:disabled):hover   { background: var(--green);  color: #fff; }
-    .ctrl-btn.end-v:not(:disabled):hover     { background: var(--maroon); color: #fff; }
-    .ctrl-btn.reset:not(:disabled):hover     { background: var(--ink-lt); color: #fff; }
-    .ctrl-btn.speakers-on:not(:disabled):hover  { background: var(--blue); color: #fff; }
-    .ctrl-btn.speakers-off:not(:disabled):hover { background: var(--smoke); color: #fff; }
-    .ctrl-btn.download:not(:disabled):hover  { background: var(--green); color: #fff; }
-
-    /* ─── Stats ──────────────────────────────────────────────── */
-    .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 1.5rem; }
-    .stat-box { background: rgba(255,255,255,0.5); border: 1px solid rgba(184,151,58,0.2); border-radius: 3px; padding: 1rem; text-align: center; }
-    .stat-value { font-family: var(--ff-serif); font-size: 2.2rem; font-weight: 400; color: var(--maroon); line-height: 1; }
-    .stat-label { font-size: 0.68rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--smoke); margin-top: 0.3rem; }
-
-    .vote-stats-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.65rem; margin-bottom: 1.5rem; }
-    .vote-stat { text-align: center; padding: 0.9rem 0.5rem; border-radius: 3px; border: 1px solid; }
-    .vote-stat.yes { border-color: rgba(46,125,79,0.3);  background: rgba(46,125,79,0.06); }
-    .vote-stat.no  { border-color: rgba(107,26,42,0.3);  background: rgba(107,26,42,0.06); }
-    .vote-stat.abs { border-color: rgba(184,151,58,0.3); background: rgba(184,151,58,0.06); }
-    .vote-stat .sv { font-family: var(--ff-serif); font-size: 1.9rem; font-weight: 400; }
-    .vote-stat.yes .sv { color: var(--green); }
-    .vote-stat.no  .sv { color: var(--maroon); }
-    .vote-stat.abs .sv { color: #8a6928; }
-    .vote-stat .sl { font-size: 0.65rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--smoke); }
-
-    /* ─── Delegate Table ─────────────────────────────────────── */
-    .delegate-list { max-height: 340px; overflow-y: auto; scrollbar-width: thin; scrollbar-color: rgba(184,151,58,0.3) transparent; }
-    .delegate-row {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 0.6rem 0.75rem; border-bottom: 1px solid rgba(184,151,58,0.1);
-      animation: rowIn 0.3s var(--ease-out) both; font-size: 0.85rem;
+    .status-text {
+      font-family: var(--ff-serif); font-size: 1rem; font-weight: 300;
+      font-style: italic; color: var(--smoke); text-align: center;
+      margin-top: 1.5rem; letter-spacing: 0.02em;
     }
-    @keyframes rowIn { from { opacity: 0; transform: translateX(-8px); } to { opacity: 1; transform: translateX(0); } }
-    .delegate-row:last-child { border-bottom: none; }
-    .d-name  { font-weight: 400; color: var(--ink); }
-    .d-phone { font-size: 0.7rem; color: var(--smoke); }
-    .d-badge { font-size: 0.65rem; letter-spacing: 0.12em; text-transform: uppercase; padding: 0.25rem 0.55rem; border-radius: 2px; font-weight: 500; }
-    .d-badge.present        { background: rgba(184,151,58,0.15); color: #8a6928; }
-    .d-badge.present_voting { background: rgba(46,125,79,0.15);  color: var(--green); }
-    .d-badge.none           { background: rgba(138,121,104,0.12); color: var(--smoke); }
-    .d-vote { font-size: 0.72rem; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; min-width: 55px; text-align: right; }
-    .d-vote.yes     { color: var(--green); }
-    .d-vote.no      { color: var(--maroon); }
-    .d-vote.abstain { color: #8a6928; }
-    .d-vote.none    { color: var(--smoke); }
 
-    /* ─── NEW: Speaker List Styles ───────────────────────────── */
-    .speaker-list { max-height: 300px; overflow-y: auto; scrollbar-width: thin; }
-    .speaker-row {
-      display: flex; align-items: center; gap: 0.75rem;
-      padding: 0.65rem 0.75rem; border-bottom: 1px solid rgba(184,151,58,0.1);
-      animation: rowIn 0.3s var(--ease-out) both;
-    }
-    .speaker-row:last-child { border-bottom: none; }
-    .speaker-num {
-      font-family: var(--ff-serif); font-size: 1.3rem; color: var(--gold);
-      min-width: 24px; text-align: center; line-height: 1;
-    }
-    .speaker-info { flex: 1; }
-    .speaker-name { font-size: 0.88rem; color: var(--ink); font-weight: 400; }
-    .speaker-phone { font-size: 0.68rem; color: var(--smoke); }
-    .speaker-actions { display: flex; gap: 0.35rem; }
-    .spk-btn {
-      padding: 0.3rem 0.55rem; border: 1px solid rgba(107,26,42,0.2);
-      border-radius: 2px; background: transparent; font-size: 0.7rem;
-      cursor: pointer; color: var(--ink-lt); transition: all 0.15s;
-      font-family: var(--ff-sans);
-    }
-    .spk-btn:hover { background: var(--maroon); color: #fff; border-color: var(--maroon); }
-    .spk-btn.up   { }
-    .spk-btn.down { }
-    .spk-btn.rm   { border-color: rgba(107,26,42,0.3); color: var(--maroon); }
-    .spk-btn.rm:hover { background: var(--maroon); }
+    /* ─── Divider ─────────────────────────────────────────── */
+    .ornament-divider { display: flex; align-items: center; gap: 0.75rem; margin: 1.5rem 0; }
+    .ornament-divider span { flex: 1; height: 1px; background: linear-gradient(90deg, transparent, rgba(184,151,58,0.4), transparent); }
+    .ornament-divider i { color: var(--gold); font-style: normal; font-size: 0.6rem; }
 
-    /* Status bar for speaker list open/closed */
-    .speaker-status-bar {
-      display: flex; align-items: center; gap: 0.5rem;
-      padding: 0.5rem 0.75rem; border-radius: 3px; margin-bottom: 1rem;
-      font-size: 0.72rem; letter-spacing: 0.12em; text-transform: uppercase;
+    /* ─── Form ─────────────────────────────────────────────── */
+    .field { margin-bottom: 1.2rem; }
+    label {
+      display: block; font-size: 0.72rem; letter-spacing: 0.16em;
+      text-transform: uppercase; color: var(--smoke); margin-bottom: 0.5rem; font-weight: 400;
     }
-    .speaker-status-bar.open   { background: rgba(26,74,122,0.08); color: var(--blue); border: 1px solid rgba(26,74,122,0.2); }
-    .speaker-status-bar.closed { background: rgba(138,121,104,0.1); color: var(--smoke); border: 1px solid rgba(138,121,104,0.2); }
-    .ssb-dot { width: 6px; height: 6px; border-radius: 50%; }
-    .speaker-status-bar.open   .ssb-dot { background: var(--blue); box-shadow: 0 0 5px rgba(26,74,122,0.5); }
-    .speaker-status-bar.closed .ssb-dot { background: var(--smoke); }
-
-    /* ─── NEW: Motion Log Styles ─────────────────────────────── */
-    .motion-row {
-      display: flex; align-items: flex-start; gap: 0.75rem;
-      padding: 0.75rem; border-bottom: 1px solid rgba(184,151,58,0.1);
-      animation: rowIn 0.3s var(--ease-out) both;
-    }
-    .motion-row:last-child { border-bottom: none; }
-    .motion-num { font-family: var(--ff-serif); font-size: 1.1rem; color: var(--smoke); min-width: 20px; }
-    .motion-info { flex: 1; }
-    .motion-type { font-size: 0.82rem; color: var(--ink); font-weight: 400; }
-    .motion-meta { font-size: 0.7rem; color: var(--smoke); margin-top: 0.15rem; }
-    .motion-badge {
-      font-size: 0.65rem; letter-spacing: 0.12em; text-transform: uppercase;
-      padding: 0.2rem 0.5rem; border-radius: 2px; font-weight: 500; white-space: nowrap;
-    }
-    .motion-badge.passed { background: rgba(46,125,79,0.12); color: var(--green); }
-    .motion-badge.failed { background: rgba(107,26,42,0.1);  color: var(--maroon); }
-    .motion-badge.pending { background: rgba(184,151,58,0.12); color: #8a6928; }
-    .motion-list { max-height: 280px; overflow-y: auto; scrollbar-width: thin; }
-
-    /* ─── NEW: Motion Form Modal ─────────────────────────────── */
-    .modal-overlay {
-      position: fixed; inset: 0;
-      background: rgba(44,26,16,0.5); backdrop-filter: blur(4px);
-      display: flex; align-items: center; justify-content: center;
-      padding: 1.5rem; z-index: 100;
-      animation: fadeIn 0.25s var(--ease-out);
-    }
-    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-
-    .modal-card {
-      background: linear-gradient(160deg, #fff 0%, var(--parchment) 100%);
-      border: 1px solid rgba(184,151,58,0.3); border-radius: 4px;
-      padding: 2.5rem; width: 100%; max-width: 500px; max-height: 90vh;
-      overflow-y: auto;
-      box-shadow: 0 20px 60px rgba(44,26,16,0.25);
-      position: relative;
-      animation: slideUp 0.35s var(--ease-out);
-    }
-    @keyframes slideUp { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
-    .modal-card::before {
-      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
-      background: linear-gradient(90deg, var(--maroon), var(--gold), var(--maroon));
-    }
-    .modal-title { font-family: var(--ff-serif); font-size: 1.6rem; color: var(--maroon); margin-bottom: 0.25rem; }
-    .modal-subtitle { font-size: 0.72rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--smoke); margin-bottom: 1.5rem; }
-
-    /* Form fields inside modal */
-    .form-field { margin-bottom: 1rem; }
-    .form-field label { display: block; font-size: 0.7rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--smoke); margin-bottom: 0.4rem; }
-    .form-field input,
-    .form-field select,
-    .form-field textarea {
-      width: 100%; background: rgba(255,255,255,0.8);
+    input[type="text"], input[type="tel"] {
+      width: 100%; background: rgba(255,255,255,0.7);
       border: 1px solid rgba(107,26,42,0.15); border-radius: 3px;
-      padding: 0.75rem 0.9rem; font-family: var(--ff-sans); font-size: 0.9rem;
+      padding: 0.85rem 1rem; font-family: var(--ff-sans); font-size: 0.95rem;
       color: var(--ink); outline: none; transition: border-color 0.2s, box-shadow 0.2s;
       -webkit-appearance: none;
     }
-    .form-field select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238a7968' stroke-width='1.5' fill='none'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 0.8rem center; padding-right: 2.2rem; }
-    .form-field input:focus, .form-field select:focus, .form-field textarea:focus { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(184,151,58,0.1); }
-
-    .result-buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem; }
-    .result-btn {
-      padding: 0.75rem; border: 1.5px solid; border-radius: 3px;
-      font-family: var(--ff-sans); font-size: 0.75rem; letter-spacing: 0.15em;
-      text-transform: uppercase; font-weight: 500; cursor: pointer; background: transparent;
-      transition: all 0.2s;
-    }
-    .result-btn.pass  { border-color: var(--green); color: var(--green); }
-    .result-btn.fail  { border-color: var(--maroon); color: var(--maroon); }
-    .result-btn.pass.active { background: var(--green); color: #fff; }
-    .result-btn.fail.active { background: var(--maroon); color: #fff; }
-
-    .modal-actions { display: flex; gap: 0.75rem; margin-top: 1.5rem; }
-    .modal-btn {
-      flex: 1; padding: 0.9rem; border: none; border-radius: 3px;
-      font-family: var(--ff-sans); font-size: 0.78rem; letter-spacing: 0.18em;
-      text-transform: uppercase; font-weight: 500; cursor: pointer;
-      transition: all 0.2s; position: relative; overflow: hidden;
-    }
-    .modal-btn.save   { background: linear-gradient(135deg, var(--maroon), var(--maroon-lt)); color: var(--parchment); box-shadow: 0 4px 14px rgba(107,26,42,0.2); }
-    .modal-btn.save:hover { box-shadow: 0 6px 20px rgba(107,26,42,0.3); transform: translateY(-1px); }
-    .modal-btn.cancel { background: transparent; border: 1px solid rgba(107,26,42,0.2); color: var(--smoke); }
-    .modal-btn.cancel:hover { background: rgba(107,26,42,0.05); }
-
-    /* ─── Ornaments ──────────────────────────────────────────── */
-    .ornament-divider { display: flex; align-items: center; gap: 0.75rem; margin: 1rem 0; }
-    .ornament-divider span { flex: 1; height: 1px; background: linear-gradient(90deg, transparent, rgba(184,151,58,0.3), transparent); }
-    .ornament-divider i { color: var(--gold); font-style: normal; font-size: 0.55rem; }
-
-    /* ─── Login typography ───────────────────────────────────── */
-    .screen-title { font-family: var(--ff-serif); font-size: 1.9rem; font-weight: 400; color: var(--maroon); text-align: center; margin-bottom: 0.3rem; }
-    .screen-subtitle { font-size: 0.72rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--smoke); text-align: center; margin-bottom: 1.8rem; }
-    label { display: block; font-size: 0.7rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--smoke); margin-bottom: 0.45rem; }
-    input[type="tel"] { width: 100%; background: rgba(255,255,255,0.7); border: 1px solid rgba(107,26,42,0.15); border-radius: 3px; padding: 0.85rem 1rem; font-family: var(--ff-sans); font-size: 0.95rem; color: var(--ink); outline: none; transition: border-color 0.2s, box-shadow 0.2s; -webkit-appearance: none; }
     input:focus { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(184,151,58,0.12); }
     input::placeholder { color: var(--smoke); opacity: 0.6; }
-    .btn-primary { display: block; width: 100%; padding: 1rem; margin-top: 1.5rem; background: linear-gradient(135deg, var(--maroon), var(--maroon-lt)); color: var(--parchment); border: none; border-radius: 3px; font-family: var(--ff-sans); font-size: 0.8rem; letter-spacing: 0.2em; text-transform: uppercase; font-weight: 500; cursor: pointer; box-shadow: 0 4px 16px rgba(107,26,42,0.25); transition: transform 0.15s, box-shadow 0.15s; position: relative; overflow: hidden; }
-    .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 24px rgba(107,26,42,0.35); }
+
     .error-msg { font-size: 0.8rem; color: var(--maroon); text-align: center; margin-top: 0.75rem; font-style: italic; min-height: 1.2em; }
 
-    /* ─── Ripple ─────────────────────────────────────────────── */
-    .ripple { position: absolute; border-radius: 50%; background: rgba(255,255,255,0.3); transform: scale(0); animation: ripple 0.5s linear; pointer-events: none; }
+    /* ─── Buttons ─────────────────────────────────────────── */
+    .btn {
+      display: block; width: 100%; padding: 1rem; border: none; border-radius: 3px;
+      font-family: var(--ff-sans); font-size: 0.82rem; letter-spacing: 0.2em;
+      text-transform: uppercase; font-weight: 500; cursor: pointer;
+      position: relative; overflow: hidden;
+      transition: transform 0.15s var(--ease-out), box-shadow 0.15s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .btn:active { transform: scale(0.97); }
+    .btn-primary {
+      background: linear-gradient(135deg, var(--maroon), var(--maroon-lt));
+      color: var(--parchment); box-shadow: 0 4px 16px rgba(107,26,42,0.25); margin-top: 1.5rem;
+    }
+    .btn-primary:hover { box-shadow: 0 6px 24px rgba(107,26,42,0.35); transform: translateY(-1px); }
+
+    .btn-secondary {
+      background: transparent; border: 1.5px solid rgba(107,26,42,0.3); color: var(--maroon);
+      margin-top: 0.75rem;
+    }
+    .btn-secondary:hover { background: rgba(107,26,42,0.05); }
+
+    /* ─── Vote Buttons ────────────────────────────────────── */
+    .vote-buttons { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.75rem; margin-top: 1.8rem; }
+    .vote-btn {
+      padding: 1.2rem 0.5rem; border: 1.5px solid; border-radius: 3px;
+      font-family: var(--ff-sans); font-size: 0.75rem; letter-spacing: 0.18em;
+      text-transform: uppercase; font-weight: 500; cursor: pointer;
+      background: transparent; position: relative; overflow: hidden;
+      transition: all 0.2s var(--ease-out); -webkit-tap-highlight-color: transparent;
+    }
+    .vote-btn:disabled { cursor: not-allowed; opacity: 0.45; }
+    .vote-btn:not(:disabled):hover { transform: translateY(-2px); }
+    .vote-btn.yes  { border-color: #2e7d4f; color: #2e7d4f; }
+    .vote-btn.no   { border-color: var(--maroon); color: var(--maroon); }
+    .vote-btn.abs  { border-color: var(--gold); color: #8a6928; }
+    .vote-btn.yes.selected  { background: #2e7d4f; color: #fff; box-shadow: 0 4px 16px rgba(46,125,79,0.3); }
+    .vote-btn.no.selected   { background: var(--maroon); color: #fff; box-shadow: 0 4px 16px rgba(107,26,42,0.3); }
+    .vote-btn.abs.selected  { background: var(--gold); color: #fff; box-shadow: 0 4px 16px rgba(184,151,58,0.3); }
+
+    /* ─── RC Buttons ──────────────────────────────────────── */
+    .rc-buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-top: 1.8rem; }
+    .rc-btn {
+      padding: 1.1rem 0.5rem; border: 1.5px solid var(--maroon); border-radius: 3px;
+      font-family: var(--ff-sans); font-size: 0.75rem; letter-spacing: 0.14em;
+      text-transform: uppercase; font-weight: 500; cursor: pointer;
+      background: transparent; color: var(--maroon); transition: all 0.2s var(--ease-out);
+      -webkit-tap-highlight-color: transparent; position: relative; overflow: hidden;
+    }
+    .rc-btn:hover { background: var(--maroon); color: var(--parchment); }
+    .rc-btn.selected { background: var(--maroon); color: var(--parchment); }
+
+    /* ─── Welcome Banner ──────────────────────────────────── */
+    .welcome-name { font-family: var(--ff-serif); font-size: 1.9rem; font-weight: 500; color: var(--maroon); text-align: center; line-height: 1.2; }
+    .welcome-committee { font-size: 0.75rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold); text-align: center; margin-top: 0.4rem; font-weight: 400; }
+
+    /* ─── Committee Selection ─────────────────────────────── */
+    .committee-grid { display: grid; gap: 1rem; margin-top: 1.5rem; }
+    .committee-card {
+      border: 1.5px solid rgba(107,26,42,0.2); border-radius: 4px;
+      padding: 1.5rem; text-align: center; cursor: pointer;
+      transition: all 0.25s var(--ease-out); background: rgba(255,255,255,0.5);
+    }
+    .committee-card:hover { transform: translateY(-4px); border-color: var(--gold); box-shadow: 0 8px 24px rgba(184,151,58,0.15); }
+    .committee-name { font-family: var(--ff-serif); font-size: 1.4rem; color: var(--maroon); }
+    .committee-full { font-size: 0.7rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--smoke); margin-top: 0.3rem; }
+
+    /* ─── Ripple ──────────────────────────────────────────── */
+    .ripple { position: absolute; border-radius: 50%; background: rgba(255,255,255,0.35); transform: scale(0); animation: ripple 0.5s linear; pointer-events: none; }
     @keyframes ripple { to { transform: scale(4); opacity: 0; } }
 
-    /* ─── Responsive ─────────────────────────────────────────── */
-    @media (max-width: 600px) {
-      .admin-layout { padding: 1rem 1rem 3rem; }
-      .card { padding: 1.5rem; }
-      .stats-grid { grid-template-columns: 1fr 1fr; }
-      .admin-header { flex-direction: column; align-items: flex-start; }
+    /* ─── Spinner ─────────────────────────────────────────── */
+    .spinner { width: 24px; height: 24px; border: 2px solid rgba(107,26,42,0.15); border-top-color: var(--maroon); border-radius: 50%; animation: spin 0.7s linear infinite; margin: 2rem auto; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ─── NEW: Speaker Queue Banner ────────────────────────────
+       Shown on idle/voting screens when speaker list is open
+    ──────────────────────────────────────────────────────────── */
+    .speaker-banner {
+      margin-top: 1.5rem;
+      border: 1px solid rgba(184,151,58,0.3);
+      border-radius: 4px;
+      overflow: hidden;
+      animation: fadeUp 0.4s var(--ease-out) both;
+    }
+    .speaker-banner-header {
+      background: linear-gradient(135deg, rgba(184,151,58,0.12), rgba(184,151,58,0.06));
+      padding: 0.6rem 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .speaker-banner-title {
+      font-size: 0.68rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--gold);
+      font-weight: 500;
+    }
+    .speaker-position-badge {
+      font-family: var(--ff-serif);
+      font-size: 0.95rem;
+      color: var(--maroon);
+      font-style: italic;
+    }
+    .speaker-banner-body {
+      padding: 0.75rem 1rem;
+      background: rgba(255,255,255,0.4);
+    }
+
+    /* ─── NEW: Request-to-Speak Button ─────────────────────── */
+    .btn-speak {
+      display: block; width: 100%; padding: 0.9rem 1rem;
+      border: 1.5px solid var(--gold); border-radius: 3px;
+      background: transparent; color: #8a6928;
+      font-family: var(--ff-sans); font-size: 0.78rem;
+      letter-spacing: 0.18em; text-transform: uppercase; font-weight: 500;
+      cursor: pointer; position: relative; overflow: hidden;
+      transition: all 0.2s var(--ease-out); margin-top: 1.2rem;
+    }
+    .btn-speak:hover:not(:disabled) { background: var(--gold); color: #fff; transform: translateY(-1px); }
+    .btn-speak:disabled { opacity: 0.45; cursor: not-allowed; }
+    .btn-speak.in-queue { background: rgba(184,151,58,0.1); border-color: var(--gold); color: #8a6928; }
+
+    /* ─── Responsive ──────────────────────────────────────── */
+    @media (max-width: 480px) {
+      .card { padding: 2.2rem 1.5rem; }
+      .screen-title { font-size: 1.7rem; }
+      .vote-buttons { gap: 0.5rem; }
+      .vote-btn { padding: 1rem 0.25rem; font-size: 0.7rem; }
     }
   </style>
 </head>
 <body>
 
   <!-- ══════════════════════════════════════════════════════════
-       SCREEN 1 — ADMIN LOGIN
+       SCREEN 1 — LOGIN
   ══════════════════════════════════════════════════════════════ -->
   <div class="screen active" id="screen-login">
-    <div style="display:flex;align-items:center;justify-content:center;min-height:100vh;padding:2rem 1rem;">
-      <div class="card card-login">
-        <div style="text-align:center;margin-bottom:1.5rem;">
-          <svg width="40" height="40" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" style="opacity:0.65">
-            <circle cx="32" cy="32" r="28" stroke="#b8973a" stroke-width="1.5" stroke-dasharray="3 3"/>
-            <circle cx="32" cy="32" r="18" stroke="#6b1a2a" stroke-width="1"/>
-            <path d="M32 14 C32 14 22 22 22 32 C22 42 32 50 32 50 C32 50 42 42 42 32 C42 22 32 14 32 14Z" stroke="#6b1a2a" stroke-width="1" fill="none"/>
-            <path d="M14 32 C14 32 22 22 32 22 C42 22 50 32 50 32 C50 32 42 42 32 42 C22 42 14 32 14 32Z" stroke="#6b1a2a" stroke-width="1" fill="none"/>
-            <circle cx="32" cy="32" r="3" fill="#b8973a"/>
-          </svg>
+    <div class="card">
+      <div class="crest">
+        <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="32" cy="32" r="28" stroke="#b8973a" stroke-width="1.5" stroke-dasharray="3 3"/>
+          <circle cx="32" cy="32" r="18" stroke="#6b1a2a" stroke-width="1"/>
+          <path d="M32 14 C32 14 22 22 22 32 C22 42 32 50 32 50 C32 50 42 42 42 32 C42 22 32 14 32 14Z" stroke="#6b1a2a" stroke-width="1" fill="none"/>
+          <path d="M14 32 C14 32 22 22 32 22 C42 22 50 32 50 32 C50 32 42 42 32 42 C22 42 14 32 14 32Z" stroke="#6b1a2a" stroke-width="1" fill="none"/>
+          <circle cx="32" cy="32" r="3" fill="#b8973a"/>
+        </svg>
+      </div>
+      <h1 class="screen-title">Enter the Committee</h1>
+      <p class="screen-subtitle">Model United Nations · Delegate Portal</p>
+      <div class="ornament-divider"><span></span><i>✦</i><span></span></div>
+      <div class="field">
+        <label for="inp-delegation">Delegation</label>
+        <input type="text" id="inp-delegation" placeholder="e.g. United States of America" />
+      </div>
+      <div class="field">
+        <label for="inp-phone">Phone Number</label>
+        <input type="tel" id="inp-phone" placeholder="Registered number" />
+      </div>
+      <div class="error-msg" id="login-error"></div>
+      <button class="btn btn-primary" id="btn-login" onclick="handleLogin()">Proceed to Committee</button>
+    </div>
+    <div style="text-align:center;margin-top:1rem;">
+      <span onclick="window.location.href='admin.html'" style="cursor:pointer;font-size:0.8rem;color:var(--smoke);">⚙ Admin</span>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════
+       SCREEN 1.5 — COMMITTEE SELECTION
+  ══════════════════════════════════════════════════════════════ -->
+  <div class="screen" id="screen-committee">
+    <div class="card">
+      <h1 class="screen-title">Select Your Committee</h1>
+      <p class="screen-subtitle">Where will you deliberate?</p>
+      <div class="ornament-divider"><span></span><i>✦</i><span></span></div>
+      <div class="committee-grid">
+        <div class="committee-card" onclick="selectCommittee('United Nations Security Council')">
+          <div class="committee-name">UNSC</div>
+          <div class="committee-full">United Nations Security Council</div>
         </div>
-        <h1 class="screen-title">Committee Control</h1>
-        <p class="screen-subtitle">Administrator Access</p>
-        <div class="ornament-divider"><span></span><i>✦</i><span></span></div>
-        <div style="margin-bottom:1.2rem;">
-          <label for="admin-phone">Admin Phone Number</label>
-          <input type="tel" id="admin-phone" placeholder="Registered admin number" />
+        <div class="committee-card" onclick="selectCommittee('Lok Sabha')">
+          <div class="committee-name">Lok Sabha</div>
+          <div class="committee-full">Indian Parliament</div>
         </div>
-        <div class="error-msg" id="admin-error"></div>
-        <button class="btn-primary" id="btn-admin-login" onclick="handleAdminLogin()">Enter Control Panel</button>
       </div>
     </div>
   </div>
 
   <!-- ══════════════════════════════════════════════════════════
-       SCREEN 2 — ADMIN PANEL
+       SCREEN 2 — IDLE
   ══════════════════════════════════════════════════════════════ -->
-  <div class="screen" id="screen-panel">
-    <div class="admin-layout">
-
-      <!-- Header -->
-      <div class="admin-header">
-        <div class="header-left">
-          <div class="header-crest">
-            <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <circle cx="32" cy="32" r="28" stroke="#b8973a" stroke-width="1.5" stroke-dasharray="3 3"/>
-              <circle cx="32" cy="32" r="18" stroke="#6b1a2a" stroke-width="1"/>
-              <path d="M32 14 C32 14 22 22 22 32 C22 42 32 50 32 50 C32 50 42 42 42 32 C42 22 32 14 32 14Z" stroke="#6b1a2a" stroke-width="1" fill="none"/>
-              <path d="M14 32 C14 32 22 22 32 22 C42 22 50 32 50 32 C50 32 42 42 32 42 C22 42 14 32 14 32Z" stroke="#6b1a2a" stroke-width="1" fill="none"/>
-              <circle cx="32" cy="32" r="3" fill="#b8973a"/>
-            </svg>
-          </div>
-          <div>
-            <div class="admin-title">Committee Control</div>
-            <div class="mode-indicator">
-              <div class="mode-dot" id="mode-dot"></div>
-              <span id="mode-label">Idle</span>
-            </div>
-          </div>
-        </div>
-        <div>
-          <div class="committee-badge" id="committee-name-badge">Committee</div>
-          <div class="admin-subtitle" style="text-align:right;margin-top:0.3rem;" id="admin-name-badge">Administrator</div>
-        </div>
+  <div class="screen" id="screen-idle">
+    <div class="card">
+      <div class="crest">
+        <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="32" cy="32" r="28" stroke="#b8973a" stroke-width="1.5" stroke-dasharray="3 3"/>
+          <circle cx="32" cy="32" r="18" stroke="#6b1a2a" stroke-width="1"/>
+          <path d="M32 14 C32 14 22 22 22 32 C22 42 32 50 32 50 C32 50 42 42 42 32 C42 22 32 14 32 14Z" stroke="#6b1a2a" stroke-width="1" fill="none"/>
+          <path d="M14 32 C14 32 22 22 32 22 C42 22 50 32 50 32 C50 32 42 42 32 42 C22 42 14 32 14 32Z" stroke="#6b1a2a" stroke-width="1" fill="none"/>
+          <circle cx="32" cy="32" r="3" fill="#b8973a"/>
+        </svg>
       </div>
+      <div class="welcome-name" id="idle-name">—</div>
+      <div class="welcome-committee" id="idle-committee">Committee</div>
+      <div class="ornament-divider" style="margin-top:1.5rem;"><span></span><i>✦</i><span></span></div>
+      <p class="status-text">Awaiting proceedings…</p>
+      <p class="status-text" style="margin-top:0.5rem;font-size:0.85rem;">The Chair has not yet initiated a session.</p>
 
-      <!-- ── ROW 1: Session Controls + Attendance + Delegate Register ── -->
-      <div class="admin-grid">
-
-        <!-- LEFT: Session Controls + Stats -->
-        <div>
-          <div class="card">
-            <div class="section-label">Session Controls</div>
-            <div class="control-grid">
-              <button class="ctrl-btn start-rc" id="btn-start-rc" onclick="startRollCall()">
-                <span class="btn-icon">📋</span> Initiate Roll Call
-              </button>
-              <button class="ctrl-btn end-rc" id="btn-end-rc" onclick="endRollCall()" disabled>
-                <span class="btn-icon">✓</span> Conclude Roll Call
-              </button>
-              <button class="ctrl-btn start-v" id="btn-start-v" onclick="startVoting()" disabled>
-                <span class="btn-icon">🗳</span> Commence Voting
-              </button>
-              <button class="ctrl-btn end-v" id="btn-end-v" onclick="endVoting()" disabled>
-                <span class="btn-icon">🔒</span> Close Voting
-              </button>
-              <div class="ornament-divider"><span></span><i>✦</i><span></span></div>
-              <button class="ctrl-btn reset" id="btn-reset" onclick="resetSession()">
-                <span class="btn-icon">↺</span> Reset Session
-              </button>
-              <!-- NEW: Download Report Button -->
-              <button class="ctrl-btn download" id="btn-download" onclick="downloadReport()">
-                <span class="btn-icon">⬇</span> Download Session Report
-              </button>
-            </div>
-          </div>
-
-          <!-- Attendance Stats -->
-          <div class="card" style="margin-top:1.5rem;">
-            <div class="section-label">Attendance</div>
-            <div class="stats-grid">
-              <div class="stat-box">
-                <div class="stat-value" id="stat-present">0</div>
-                <div class="stat-label">Present</div>
-              </div>
-              <div class="stat-box">
-                <div class="stat-value" id="stat-pv">0</div>
-                <div class="stat-label">Present &amp; Voting</div>
-              </div>
-            </div>
-            <div class="section-label" style="margin-top:0.5rem;">Voting Results</div>
-            <div class="vote-stats-grid">
-              <div class="vote-stat yes"><div class="sv" id="stat-yes">0</div><div class="sl">Yes</div></div>
-              <div class="vote-stat no" ><div class="sv" id="stat-no">0</div><div class="sl">No</div></div>
-              <div class="vote-stat abs"><div class="sv" id="stat-abs">0</div><div class="sl">Abstain</div></div>
-            </div>
-          </div>
-        </div>
-
-        <!-- RIGHT: Delegate Register -->
-        <div>
-          <div class="card" style="height:100%;min-height:420px;">
-            <div class="section-label">Delegate Register</div>
-            <div class="delegate-list" id="delegate-list">
-              <div style="text-align:center;color:var(--smoke);font-size:0.85rem;padding:2rem;font-style:italic;">No delegates registered yet.</div>
-            </div>
-          </div>
-        </div>
+      <!-- ── NEW: Speaker Request Section (shown when speakerListOpen) ── -->
+      <div id="idle-speaker-section" style="display:none;">
+        <div class="ornament-divider" style="margin-top:1rem;"><span></span><i>✦</i><span></span></div>
+        <button class="btn-speak" id="idle-speak-btn" onclick="requestToSpeak()">
+          🎙 Request to Speak
+        </button>
+        <div id="idle-speaker-status" style="text-align:center;font-size:0.8rem;color:var(--smoke);margin-top:0.6rem;font-style:italic;"></div>
       </div>
-
-      <!-- ── ROW 2: Speaker List + Motion Log ── -->
-      <div class="admin-grid" style="margin-top:1.5rem;">
-
-        <!-- LEFT: Speaker's List Manager (NEW) -->
-        <div>
-          <div class="card">
-            <div class="section-label">Speaker's List</div>
-
-            <!-- Speaker status bar -->
-            <div class="speaker-status-bar closed" id="speaker-status-bar">
-              <div class="ssb-dot"></div>
-              <span id="speaker-status-text">Requests Closed</span>
-            </div>
-
-            <!-- Speaker controls -->
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem;margin-bottom:1rem;">
-              <button class="ctrl-btn speakers-on" id="btn-speaker-open" onclick="openSpeakerList()" style="padding:0.65rem 0.8rem;font-size:0.72rem;">
-                <span class="btn-icon">🎙</span> Open Requests
-              </button>
-              <button class="ctrl-btn speakers-off" id="btn-speaker-close" onclick="closeSpeakerList()" style="padding:0.65rem 0.8rem;font-size:0.72rem;" disabled>
-                <span class="btn-icon">🔇</span> Close Requests
-              </button>
-            </div>
-            <button class="ctrl-btn reset" onclick="clearSpeakerList()" style="padding:0.65rem 0.8rem;font-size:0.7rem;margin-bottom:1rem;width:100%;">
-              <span class="btn-icon">✕</span> Clear Entire List
-            </button>
-
-            <!-- Speaker list -->
-            <div class="speaker-list" id="speaker-list">
-              <div style="text-align:center;color:var(--smoke);font-size:0.85rem;padding:1.5rem;font-style:italic;">No speakers queued.</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- RIGHT: Motion Log (NEW) -->
-        <div>
-          <div class="card">
-            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
-              <div class="section-label" style="margin-bottom:0;">Motion Log</div>
-              <button class="ctrl-btn start-v" onclick="openMotionForm()" style="padding:0.5rem 0.9rem;font-size:0.7rem;width:auto;">
-                <span class="btn-icon">+</span> Log Motion
-              </button>
-            </div>
-            <div class="motion-list" id="motion-list">
-              <div style="text-align:center;color:var(--smoke);font-size:0.85rem;padding:1.5rem;font-style:italic;">No motions logged yet.</div>
-            </div>
-          </div>
-        </div>
-      </div>
-
     </div>
   </div>
 
   <!-- ══════════════════════════════════════════════════════════
-       NEW: MOTION FORM MODAL
-       Shown after voting ends or manually triggered
+       SCREEN 3 — ROLL CALL
   ══════════════════════════════════════════════════════════════ -->
-  <div class="modal-overlay" id="motion-modal" style="display:none;">
-    <div class="modal-card">
-      <div class="modal-title">Log Motion</div>
-      <div class="modal-subtitle">Record the outcome of this session</div>
+  <div class="screen" id="screen-rollcall">
+    <div class="card">
+      <h1 class="screen-title">Roll Call</h1>
+      <p class="screen-subtitle" style="margin-bottom:0.5rem;">is in progress</p>
+      <div class="ornament-divider"><span></span><i>✦</i><span></span></div>
+      <p class="screen-lead">How do you wish to be recorded?</p>
+      <div class="rc-buttons">
+        <button class="rc-btn" id="rc-present" onclick="markPresence('present')">Present</button>
+        <button class="rc-btn" id="rc-present-voting" onclick="markPresence('present_voting')">Present &amp; Voting</button>
+      </div>
+      <p class="status-text" id="rc-status" style="display:none;">
+        Recorded. Please await further proceedings.
+      </p>
+    </div>
+  </div>
 
-      <div class="form-field">
-        <label>Motion Type</label>
-        <select id="motion-type">
-          <option value="">— Select type —</option>
-          <option value="Moderated Caucus">Moderated Caucus</option>
-          <option value="Unmoderated Caucus">Unmoderated Caucus</option>
-          <option value="Resolution">Resolution</option>
-          <option value="General Speakers List">General Speakers List</option>
-          <option value="Other">Other</option>
-        </select>
+  <!-- ══════════════════════════════════════════════════════════
+       SCREEN 4 — VOTING
+  ══════════════════════════════════════════════════════════════ -->
+  <div class="screen" id="screen-voting">
+    <div class="card">
+      <h1 class="screen-title">Voting has<br><em style="font-style:italic;font-weight:300;">Commenced</em></h1>
+      <p class="screen-subtitle">Cast your position</p>
+      <div class="ornament-divider"><span></span><i>✦</i><span></span></div>
+
+      <p class="screen-lead" id="voting-ineligible" style="display:none; color:var(--smoke);">
+        You are not marked as <em>Present &amp; Voting</em>.<br>
+        You may not participate in this vote.
+      </p>
+
+      <div class="vote-buttons" id="voting-btns">
+        <button class="vote-btn yes" onclick="castVote('yes')">Yes</button>
+        <button class="vote-btn no"  onclick="castVote('no')">No</button>
+        <button class="vote-btn abs" onclick="castVote('abstain')">Abstain</button>
       </div>
 
-      <div class="form-field">
-        <label>Raised By</label>
-        <input type="text" id="motion-raised-by" placeholder="Delegation name" />
-      </div>
+      <p class="status-text" id="vote-status"></p>
 
-      <div class="form-field">
-        <label>Result</label>
-        <div class="result-buttons">
-          <button class="result-btn pass" id="result-passed" onclick="selectResult('passed')">✓ Passed</button>
-          <button class="result-btn fail" id="result-failed" onclick="selectResult('failed')">✕ Failed</button>
-        </div>
+      <!-- ── NEW: Speaker Request Section during voting ── -->
+      <div id="voting-speaker-section" style="display:none;">
+        <div class="ornament-divider" style="margin-top:1rem;"><span></span><i>✦</i><span></span></div>
+        <button class="btn-speak" id="voting-speak-btn" onclick="requestToSpeak()">
+          🎙 Request to Speak
+        </button>
+        <div id="voting-speaker-status" style="text-align:center;font-size:0.8rem;color:var(--smoke);margin-top:0.6rem;font-style:italic;"></div>
       </div>
+    </div>
+  </div>
 
-      <div class="form-field">
-        <label>Topic / Description (optional)</label>
-        <input type="text" id="motion-topic" placeholder="e.g. 15 min / AI arms race" />
+  <!-- ══════════════════════════════════════════════════════════
+       SCREEN 5 — VOTE LOCKED
+  ══════════════════════════════════════════════════════════════ -->
+  <div class="screen" id="screen-vote-locked">
+    <div class="card">
+      <div class="crest">
+        <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="32" cy="32" r="28" stroke="#b8973a" stroke-width="1.5" stroke-dasharray="3 3"/>
+          <circle cx="32" cy="32" r="18" stroke="#6b1a2a" stroke-width="1"/>
+          <path d="M32 14 C32 14 22 22 22 32 C22 42 32 50 32 50 C32 50 42 42 42 32 C42 22 32 14 32 14Z" stroke="#6b1a2a" stroke-width="1" fill="none"/>
+          <path d="M14 32 C14 32 22 22 32 22 C42 22 50 32 50 32 C50 32 42 42 32 42 C22 42 14 32 14 32Z" stroke="#6b1a2a" stroke-width="1" fill="none"/>
+          <circle cx="32" cy="32" r="3" fill="#b8973a"/>
+        </svg>
       </div>
-
-      <div class="form-field">
-        <label>Duration (optional)</label>
-        <input type="text" id="motion-duration" placeholder="e.g. 15 minutes" />
-      </div>
-
-      <div id="motion-form-error" style="font-size:0.8rem;color:var(--maroon);font-style:italic;margin-top:0.5rem;min-height:1em;"></div>
-
-      <div class="modal-actions">
-        <button class="modal-btn cancel" onclick="closeMotionForm()">Cancel</button>
-        <button class="modal-btn save" onclick="saveMotion()">Save Motion</button>
-      </div>
+      <h1 class="screen-title">Voting Concluded</h1>
+      <p class="status-text">Deliberations are underway.<br>Await the Chair's announcement.</p>
     </div>
   </div>
 
@@ -581,6 +435,7 @@
     const app = initializeApp(firebaseConfig);
     const db  = getDatabase(app);
 
+    // Make Firebase globally accessible
     window.db     = db;
     window.ref    = ref;
     window.set    = set;
@@ -590,23 +445,21 @@
     window.push   = push;
     window.remove = remove;
 
-    /* ─── ADMIN LIST ───────────────────────────────────────── */
-    const ADMIN_LIST = {
-      "7004187736": { name: "Malay",       committee: "United Nations Security Council" },
-      "7903753586": { name: "Rahmat",      committee: "United Nations Security Council" },
-      "7004015159": { name: "Ish",         committee: "Lok Sabha" },
-      "9234840440": { name: "Yashvardhan", committee: "Lok Sabha" },
-      "8002537900": { name: "Divyansh",    committee: "Lok Sabha" },
-    };
+    /* ─── ALLOWED DELEGATES ────────────────────────────────── */
+    const ALLOWED_PHONES = [
+      "9999000001","9999000002","9999000003",
+      "9999000004","9999000005","9999000006",
+      // … add more
+    ];
 
-    /* ─── State ────────────────────────────────────────────── */
-    let currentAdmin       = null;
-    let currentMode        = "idle";
-    let currentVotingActive = false;
-    let speakerListOpen    = false;          // NEW
-    let currentMotionResult = null;          // NEW: selected result for motion form
-    let lastVoteSnapshot   = {};             // NEW: snapshot of votes before reset
-    let currentDelegatesSnap = {};           // NEW: live delegates snapshot
+    /* ─── Session State ────────────────────────────────────── */
+    let currentPhone       = null;
+    let currentName        = null;
+    let currentCommittee   = null;
+    let hasVoted           = false;
+    let hasMarkedRC        = false;
+    let speakerListOpen    = false;  // NEW: whether admin enabled speaker requests
+    let myQueuePosition    = null;   // NEW: this delegate's position in speaker queue
 
     /* ── Ripple ── */
     function addRipple(btn, e) {
@@ -618,482 +471,240 @@
       btn.appendChild(r);
       setTimeout(() => r.remove(), 600);
     }
-    document.querySelectorAll(".ctrl-btn, .btn-primary, .modal-btn").forEach(btn => {
+    document.querySelectorAll(".btn, .vote-btn, .rc-btn, .btn-speak").forEach(btn => {
       btn.addEventListener("click", e => addRipple(btn, e));
     });
 
-    /* ── Screen switch ── */
+    /* ── Screen switcher ── */
     function showScreen(id) {
       document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
-      document.getElementById(id).classList.add("active");
-    }
-
-    /* ── HTML escaper ── */
-    function escHtml(str) {
-      if (!str) return "";
-      return String(str).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+      const el = document.getElementById(id);
+      if (el) {
+        el.classList.add("active");
+        el.style.animation = "none";
+        el.offsetHeight;
+        el.style.animation = "";
+      }
     }
 
     /* ════════════════════════════════════════════════════════
-       ADMIN LOGIN
+       LOGIN
     ════════════════════════════════════════════════════════ */
-    window.handleAdminLogin = function () {
-      const rawPhone = document.getElementById("admin-phone").value.trim().replace(/\D/g,"");
-      const errEl    = document.getElementById("admin-error");
+    window.handleLogin = async function () {
+      const rawPhone = document.getElementById("inp-phone").value.trim().replace(/\D/g, "");
+      const rawName  = document.getElementById("inp-delegation").value.trim();
+      const errEl    = document.getElementById("login-error");
       errEl.textContent = "";
 
       if (!rawPhone) { errEl.textContent = "Please enter your phone number."; return; }
-      if (!ADMIN_LIST[rawPhone]) { errEl.textContent = "Unauthorised. This number is not registered as an admin."; return; }
+      if (!ALLOWED_PHONES.includes(rawPhone)) { errEl.textContent = "This number is not registered for this session."; return; }
+      if (!rawName)  { errEl.textContent = "Please enter your delegation name."; return; }
 
-      currentAdmin = { phone: rawPhone, ...ADMIN_LIST[rawPhone] };
-      document.getElementById("committee-name-badge").textContent = currentAdmin.committee;
-      document.getElementById("admin-name-badge").textContent     = currentAdmin.name;
-
-      showScreen("screen-panel");
-      initAdminListeners();
+      currentPhone = rawPhone;
+      currentName  = rawName;
+      showScreen("screen-committee");
     };
 
-    /* ════════════════════════════════════════════════════════
-       REAL-TIME LISTENERS
-    ════════════════════════════════════════════════════════ */
-    function initAdminListeners() {
-      update(ref(db, `sessions/${currentAdmin.committee}`), { committee: currentAdmin.committee });
+    window.selectCommittee = async function (committeeName) {
+      currentCommittee = committeeName;
+      const rawPhone   = document.getElementById("inp-phone").value.trim().replace(/\D/g, "");
+      const rawName    = document.getElementById("inp-delegation").value.trim();
+      currentPhone     = rawPhone;
+      currentName      = rawName;
 
-      /* ── Session state ── */
-      onValue(ref(db, `sessions/${currentAdmin.committee}`), (snap) => {
-        const session = snap.val() || {};
-        currentMode         = session.mode || "idle";
-        currentVotingActive = !!session.votingActive;
-        speakerListOpen     = !!session.speakerListOpen;  // NEW
-        updateModeUI();
-        updateControlButtons();
-        updateSpeakerStatusBar(); // NEW
-      });
+      const delegateRef = ref(db, `delegates/${currentCommittee}/${currentPhone}`);
+      const snap        = await get(delegateRef);
 
-      /* ── Delegates ── */
-      onValue(ref(db, `delegates/${currentAdmin.committee}`), (snap) => {
-        const delegates = snap.val() || {};
-        currentDelegatesSnap = delegates; // NEW: keep live copy
-        renderDelegates(delegates);
-        updateStats(delegates);
-      });
-
-      /* ── NEW: Speaker list ── */
-      onValue(ref(db, `speakerList/${currentAdmin.committee}`), (snap) => {
-        const queue = snap.val() || {};
-        renderSpeakerList(queue);
-      });
-
-      /* ── NEW: Motion log ── */
-      onValue(ref(db, `motions/${currentAdmin.committee}`), (snap) => {
-        const motions = snap.val() || {};
-        renderMotionLog(motions);
-      });
-    }
-
-    /* ─── Mode UI ─── */
-    function updateModeUI() {
-      const dot   = document.getElementById("mode-dot");
-      const label = document.getElementById("mode-label");
-      dot.className = "mode-dot";
-
-      if (currentMode === "idle") {
-        dot.classList.add("idle");
-        label.textContent = "Session Idle";
-      } else if (currentMode === "rollcall") {
-        dot.classList.add("rollcall");
-        label.textContent = "Roll Call in Progress";
-      } else if (currentMode === "voting" && currentVotingActive) {
-        dot.classList.add("voting");
-        label.textContent = "Voting Active";
-      } else if (currentMode === "voting" && !currentVotingActive) {
-        dot.classList.add("voting-closed");
-        label.textContent = "Voting Concluded";
-      }
-    }
-
-    /* ─── Control buttons enable/disable ─── */
-    function updateControlButtons() {
-      const idle   = currentMode === "idle";
-      const rc     = currentMode === "rollcall";
-      const voting = currentMode === "voting";
-      const vActive = currentVotingActive;
-
-      document.getElementById("btn-start-rc").disabled = !idle;
-      document.getElementById("btn-end-rc").disabled   = !rc;
-      document.getElementById("btn-start-v").disabled  = !(idle || rc) || voting;
-      document.getElementById("btn-end-v").disabled    = !(voting && vActive);
-      document.getElementById("btn-reset").disabled    = false;
-    }
-
-    /* ─── NEW: Speaker status bar ─── */
-    function updateSpeakerStatusBar() {
-      const bar  = document.getElementById("speaker-status-bar");
-      const text = document.getElementById("speaker-status-text");
-      const openBtn  = document.getElementById("btn-speaker-open");
-      const closeBtn = document.getElementById("btn-speaker-close");
-
-      if (speakerListOpen) {
-        bar.className = "speaker-status-bar open";
-        text.textContent = "Requests Open";
-        openBtn.disabled  = true;
-        closeBtn.disabled = false;
+      if (snap.exists()) {
+        const data = snap.val();
+        currentName = data.name || rawName;
       } else {
-        bar.className = "speaker-status-bar closed";
-        text.textContent = "Requests Closed";
-        openBtn.disabled  = false;
-        closeBtn.disabled = true;
+        await set(delegateRef, { name: currentName, presence: null, vote: null });
       }
-    }
 
-    /* ─── Render delegates ─── */
-    function renderDelegates(delegates) {
-      const el     = document.getElementById("delegate-list");
-      const phones = Object.keys(delegates);
-      if (phones.length === 0) {
-        el.innerHTML = `<div style="text-align:center;color:var(--smoke);font-size:0.85rem;padding:2rem;font-style:italic;">No delegates registered yet.</div>`;
-        return;
-      }
-      el.innerHTML = phones.map((phone, i) => {
-        const d         = delegates[phone];
-        const name      = d?.name || `Delegate ${phone.slice(-4)}`;
-        const presence  = d.presence || null;
-        const vote      = d.vote || null;
-        const presenceBadge = presence
-          ? `<span class="d-badge ${presence}">${presence === "present_voting" ? "P &amp; V" : "Present"}</span>`
-          : `<span class="d-badge none">Absent</span>`;
-        const voteEl = vote
-          ? `<span class="d-vote ${vote}">${vote}</span>`
-          : `<span class="d-vote none">—</span>`;
-        return `
-          <div class="delegate-row" style="animation-delay:${i*0.03}s">
-            <div>
-              <div class="d-name">${escHtml(name)}</div>
-              <div class="d-phone">·${phone.slice(-4)}</div>
-            </div>
-            <div style="display:flex;align-items:center;gap:0.6rem;">
-              ${presenceBadge}${voteEl}
-            </div>
-          </div>`;
-      }).join("");
-    }
-
-    /* ─── Aggregate stats ─── */
-    function updateStats(delegates) {
-      let present = 0, pv = 0, yes = 0, no = 0, abstain = 0;
-      Object.values(delegates).forEach(d => {
-        if (d.presence === "present")        present++;
-        if (d.presence === "present_voting") pv++;
-        if (d.vote === "yes")     yes++;
-        if (d.vote === "no")      no++;
-        if (d.vote === "abstain") abstain++;
-      });
-      document.getElementById("stat-present").textContent = present;
-      document.getElementById("stat-pv").textContent      = pv;
-      document.getElementById("stat-yes").textContent     = yes;
-      document.getElementById("stat-no").textContent      = no;
-      document.getElementById("stat-abs").textContent     = abstain;
-    }
-
-    /* ════════════════════════════════════════════════════════
-       EXISTING SESSION CONTROLS (unchanged)
-    ════════════════════════════════════════════════════════ */
-    window.startRollCall = async function () {
-      await update(ref(db, `sessions/${currentAdmin.committee}`), {
-        mode: "rollcall", votingActive: false, committee: currentAdmin.committee
-      });
-    };
-
-    window.endRollCall = async function () {
-      await update(ref(db, `sessions/${currentAdmin.committee}`), {
-        mode: "idle", votingActive: false
-      });
-    };
-
-    window.startVoting = async function () {
-      // Save current votes as snapshot before clearing (DATA PERSISTENCE)
-      lastVoteSnapshot = { ...currentDelegatesSnap };
-
-      // Reset votes (but NOT presence — roll call persists)
-      const snap      = await get(ref(db, `delegates/${currentAdmin.committee}`));
-      const delegates = snap.val() || {};
-      const updates   = {};
-      Object.keys(delegates).forEach(phone => {
-        updates[`delegates/${currentAdmin.committee}/${phone}/vote`] = null;
-      });
-      await update(ref(db), updates);
-
-      await update(ref(db, `sessions/${currentAdmin.committee}`), {
-        mode: "voting", votingActive: true, committee: currentAdmin.committee
-      });
-    };
-
-    window.endVoting = async function () {
-      await update(ref(db, `sessions/${currentAdmin.committee}`), { votingActive: false });
-      // NEW: Prompt admin to log this motion after voting closes
-      setTimeout(() => openMotionForm(), 600);
-    };
-
-    window.resetSession = async function () {
-      const confirmed = confirm("Reset the session? Votes will be cleared. Roll call and motion logs are preserved.");
-      if (!confirmed) return;
-
-      // Save vote snapshot before clearing
-      lastVoteSnapshot = { ...currentDelegatesSnap };
-
-      // Only clear votes, NOT presence (roll call persists per spec)
-      const snap      = await get(ref(db, `delegates/${currentAdmin.committee}`));
-      const delegates = snap.val() || {};
-      const updates   = {};
-      Object.keys(delegates).forEach(phone => {
-        // NOTE: presence is intentionally NOT cleared here
-        updates[`delegates/${currentAdmin.committee}/${phone}/vote`] = null;
-      });
-      await update(ref(db), updates);
-
-      await update(ref(db, `sessions/${currentAdmin.committee}`), {
-        mode: "idle", votingActive: false, committee: currentAdmin.committee
-      });
+      startSessionListener();
+      startSpeakerListener(); // NEW: start listener for speaker list
     };
 
     /* ════════════════════════════════════════════════════════
-       NEW: SPEAKER LIST MANAGEMENT
+       SESSION LISTENER
     ════════════════════════════════════════════════════════ */
+    function startSessionListener() {
+      const sessionRef = ref(db, `sessions/${currentCommittee}`);
 
-    /* Open speaker request mode — delegates can now request to speak */
-    window.openSpeakerList = async function () {
-      await update(ref(db, `sessions/${currentAdmin.committee}`), { speakerListOpen: true });
-    };
+      onValue(sessionRef, async (snap) => {
+        const session = snap.val() || {};
+        const mode    = session.mode || "idle";
 
-    /* Close speaker request mode */
-    window.closeSpeakerList = async function () {
-      await update(ref(db, `sessions/${currentAdmin.committee}`), { speakerListOpen: false });
-    };
+        document.getElementById("idle-name").textContent      = currentName;
+        document.getElementById("idle-committee").textContent = session.committee || "Committee";
 
-    /* Clear entire speaker queue */
-    window.clearSpeakerList = async function () {
-      const confirmed = confirm("Clear the entire speaker's list?");
-      if (!confirmed) return;
-      await set(ref(db, `speakerList/${currentAdmin.committee}`), null);
-    };
+        const delegSnap = await get(ref(db, `delegates/${currentCommittee}/${currentPhone}`));
+        const delegData = delegSnap.val() || {};
 
-    /* Render the speaker list in admin panel */
-    function renderSpeakerList(queue) {
-      const el      = document.getElementById("speaker-list");
-      const entries = Object.entries(queue);
+        if (mode === "idle") {
+          showScreen("screen-idle");
+          updateSpeakerUI(); // NEW
+          return;
+        }
 
-      if (entries.length === 0) {
-        el.innerHTML = `<div style="text-align:center;color:var(--smoke);font-size:0.85rem;padding:1.5rem;font-style:italic;">No speakers queued.</div>`;
-        return;
-      }
+        if (mode === "rollcall") {
+          hasMarkedRC = !!delegData.presence;
+          showScreen("screen-rollcall");
+          document.getElementById("rc-status").style.display = hasMarkedRC ? "block" : "none";
+          document.getElementById("rc-present").disabled = hasMarkedRC;
+          document.getElementById("rc-present-voting").disabled = hasMarkedRC;
+          document.getElementById("rc-present").classList.toggle("selected", delegData.presence === "present");
+          document.getElementById("rc-present-voting").classList.toggle("selected", delegData.presence === "present_voting");
+          return;
+        }
 
-      // Sort by order index
-      entries.sort((a, b) => (a[1].order || 0) - (b[1].order || 0));
+        if (mode === "voting") {
+          hasVoted = !!delegData.vote;
+          const eligible = delegData.presence === "present_voting";
 
-      el.innerHTML = entries.map(([key, speaker], i) => {
-        return `
-          <div class="speaker-row" style="animation-delay:${i*0.03}s">
-            <div class="speaker-num">${i + 1}</div>
-            <div class="speaker-info">
-              <div class="speaker-name">${escHtml(speaker.name || "Unknown")}</div>
-              <div class="speaker-phone">·${(speaker.phone || "").slice(-4)}</div>
-            </div>
-            <div class="speaker-actions">
-              ${i > 0 ? `<button class="spk-btn up" onclick="moveSpeaker('${key}', 'up')" title="Move up">↑</button>` : ""}
-              ${i < entries.length - 1 ? `<button class="spk-btn down" onclick="moveSpeaker('${key}', 'down')" title="Move down">↓</button>` : ""}
-              <button class="spk-btn rm" onclick="removeSpeaker('${key}')" title="Remove">✕</button>
-            </div>
-          </div>`;
-      }).join("");
-    }
+          if (!session.votingActive) { showScreen("screen-vote-locked"); return; }
 
-    /* Remove a speaker from queue */
-    window.removeSpeaker = async function (key) {
-      await remove(ref(db, `speakerList/${currentAdmin.committee}/${key}`));
-    };
+          showScreen("screen-voting");
+          document.getElementById("voting-ineligible").style.display = eligible ? "none" : "block";
+          document.getElementById("voting-btns").style.display       = eligible ? "grid" : "none";
 
-    /* Move speaker up or down in queue by swapping order values */
-    window.moveSpeaker = async function (key, direction) {
-      const snap    = await get(ref(db, `speakerList/${currentAdmin.committee}`));
-      const queue   = snap.val() || {};
-      const sorted  = Object.entries(queue).sort((a,b) => (a[1].order||0) - (b[1].order||0));
-      const idx     = sorted.findIndex(([k]) => k === key);
-
-      if (direction === "up" && idx > 0) {
-        const swapIdx = idx - 1;
-        const updates = {};
-        updates[`speakerList/${currentAdmin.committee}/${sorted[idx][0]}/order`]    = sorted[swapIdx][1].order;
-        updates[`speakerList/${currentAdmin.committee}/${sorted[swapIdx][0]}/order`] = sorted[idx][1].order;
-        await update(ref(db), updates);
-      } else if (direction === "down" && idx < sorted.length - 1) {
-        const swapIdx = idx + 1;
-        const updates = {};
-        updates[`speakerList/${currentAdmin.committee}/${sorted[idx][0]}/order`]    = sorted[swapIdx][1].order;
-        updates[`speakerList/${currentAdmin.committee}/${sorted[swapIdx][0]}/order`] = sorted[idx][1].order;
-        await update(ref(db), updates);
-      }
-    };
-
-    /* ════════════════════════════════════════════════════════
-       NEW: MOTION LOG SYSTEM
-    ════════════════════════════════════════════════════════ */
-
-    /* Open the motion form modal */
-    window.openMotionForm = function () {
-      // Reset form
-      document.getElementById("motion-type").value      = "";
-      document.getElementById("motion-raised-by").value = "";
-      document.getElementById("motion-topic").value     = "";
-      document.getElementById("motion-duration").value  = "";
-      document.getElementById("motion-form-error").textContent = "";
-      currentMotionResult = null;
-      document.getElementById("result-passed").classList.remove("active");
-      document.getElementById("result-failed").classList.remove("active");
-      document.getElementById("motion-modal").style.display = "flex";
-    };
-
-    /* Close motion form modal */
-    window.closeMotionForm = function () {
-      document.getElementById("motion-modal").style.display = "none";
-    };
-
-    /* Toggle result selection in motion form */
-    window.selectResult = function (val) {
-      currentMotionResult = val;
-      document.getElementById("result-passed").classList.toggle("active", val === "passed");
-      document.getElementById("result-failed").classList.toggle("active", val === "failed");
-    };
-
-    /* Save motion to Firebase */
-    window.saveMotion = async function () {
-      const type     = document.getElementById("motion-type").value;
-      const raisedBy = document.getElementById("motion-raised-by").value.trim();
-      const topic    = document.getElementById("motion-topic").value.trim();
-      const duration = document.getElementById("motion-duration").value.trim();
-      const errEl    = document.getElementById("motion-form-error");
-      errEl.textContent = "";
-
-      if (!type)             { errEl.textContent = "Please select a motion type."; return; }
-      if (!raisedBy)         { errEl.textContent = "Please enter who raised this motion."; return; }
-      if (!currentMotionResult) { errEl.textContent = "Please select a result (Passed / Failed)."; return; }
-
-      // Capture current votes from live delegate snapshot
-      const votes = {};
-      Object.entries(currentDelegatesSnap).forEach(([phone, d]) => {
-        if (d.vote) votes[phone] = d.vote;
+          if (eligible) {
+            if (hasVoted) {
+              const v = delegData.vote;
+              document.getElementById("vote-status").textContent = "Vote recorded. Await the result.";
+              document.querySelectorAll(".vote-btn").forEach(b => {
+                b.disabled = true;
+                if ((b.classList.contains("yes") && v === "yes") ||
+                    (b.classList.contains("no")  && v === "no")  ||
+                    (b.classList.contains("abs") && v === "abstain")) {
+                  b.classList.add("selected");
+                }
+              });
+            } else {
+              document.getElementById("vote-status").textContent = "";
+              document.querySelectorAll(".vote-btn").forEach(b => { b.disabled = false; b.classList.remove("selected"); });
+            }
+          }
+          updateSpeakerUI(); // NEW: show speaker request on voting screen too
+        }
       });
-
-      // Build motion object
-      const motionData = {
-        type:      type,
-        raisedBy:  raisedBy,
-        result:    currentMotionResult,
-        topic:     topic || null,
-        duration:  duration || null,
-        timestamp: Date.now(),
-        votes:     votes
-      };
-
-      // Push to Firebase: motions/{committee}/{autoId}
-      await push(ref(db, `motions/${currentAdmin.committee}`), motionData);
-      closeMotionForm();
-    };
-
-    /* Render motion log */
-    function renderMotionLog(motions) {
-      const el      = document.getElementById("motion-list");
-      const entries = Object.entries(motions);
-
-      if (entries.length === 0) {
-        el.innerHTML = `<div style="text-align:center;color:var(--smoke);font-size:0.85rem;padding:1.5rem;font-style:italic;">No motions logged yet.</div>`;
-        return;
-      }
-
-      // Sort by timestamp descending (newest first)
-      entries.sort((a,b) => (b[1].timestamp||0) - (a[1].timestamp||0));
-
-      el.innerHTML = entries.map(([key, m], i) => {
-        const ts    = m.timestamp ? new Date(m.timestamp).toLocaleTimeString([], {hour:"2-digit",minute:"2-digit"}) : "";
-        const badge = `<span class="motion-badge ${m.result || "pending"}">${m.result || "Pending"}</span>`;
-        const meta  = [m.raisedBy && `By: ${escHtml(m.raisedBy)}`, m.topic && escHtml(m.topic), ts].filter(Boolean).join(" · ");
-
-        return `
-          <div class="motion-row" style="animation-delay:${i*0.04}s">
-            <div class="motion-num">${entries.length - i}</div>
-            <div class="motion-info">
-              <div class="motion-type">${escHtml(m.type || "Motion")}</div>
-              <div class="motion-meta">${meta}</div>
-            </div>
-            ${badge}
-          </div>`;
-      }).join("");
     }
 
     /* ════════════════════════════════════════════════════════
-       NEW: DOWNLOAD SESSION REPORT (CSV)
-       Generates a CSV with delegate list, motions, voting breakdowns
+       NEW: SPEAKER LIST LISTENER
+       Watches speakerList/{committee} and session.speakerListOpen
     ════════════════════════════════════════════════════════ */
-    window.downloadReport = async function () {
-      const committee = currentAdmin.committee;
-      let csv = [];
-
-      // ── Section 1: Delegate List ──
-      csv.push(`"SESSION REPORT — ${committee}"`);
-      csv.push(`"Generated: ${new Date().toLocaleString()}"`);
-      csv.push("");
-      csv.push(`"=== DELEGATE LIST ==="`);
-      csv.push('"Name","Phone","Committee","Presence","Last Vote"');
-
-      const delegSnap = await get(ref(db, `delegates/${committee}`));
-      const delegates = delegSnap.val() || {};
-      Object.entries(delegates).forEach(([phone, d]) => {
-        const name     = d.name || `Delegate ${phone.slice(-4)}`;
-        const presence = d.presence || "absent";
-        const vote     = d.vote || "—";
-        csv.push(`"${name}","${phone}","${committee}","${presence}","${vote}"`);
+    function startSpeakerListener() {
+      // Listen to speaker list open/close flag
+      onValue(ref(db, `sessions/${currentCommittee}/speakerListOpen`), (snap) => {
+        speakerListOpen = !!snap.val();
+        updateSpeakerUI();
       });
 
-      // ── Section 2: Motion Log ──
-      csv.push("");
-      csv.push(`"=== MOTION LOG ==="`);
-      csv.push('"#","Motion Type","Raised By","Result","Topic","Duration","Timestamp"');
-
-      const motionSnap = await get(ref(db, `motions/${committee}`));
-      const motions    = motionSnap.val() || {};
-      const sortedMotions = Object.entries(motions).sort((a,b) => (a[1].timestamp||0) - (b[1].timestamp||0));
-
-      sortedMotions.forEach(([key, m], idx) => {
-        const ts = m.timestamp ? new Date(m.timestamp).toLocaleString() : "";
-        csv.push(`"${idx+1}","${m.type||""}","${m.raisedBy||""}","${m.result||""}","${m.topic||""}","${m.duration||""}","${ts}"`);
+      // Listen to this delegate's position in queue
+      onValue(ref(db, `speakerList/${currentCommittee}`), (snap) => {
+        const queue = snap.val() || {};
+        const entry = Object.values(queue).find(e => e.phone === currentPhone);
+        myQueuePosition = entry ? entry.order : null;
+        updateSpeakerUI();
       });
+    }
 
-      // ── Section 3: Voting Breakdown per Motion ──
-      csv.push("");
-      csv.push(`"=== VOTING BREAKDOWN ==="`);
+    /* ── NEW: Update speaker UI on both idle and voting screens ── */
+    function updateSpeakerUI() {
+      const sections = [
+        { sectionId: "idle-speaker-section",   btnId: "idle-speak-btn",   statusId: "idle-speaker-status" },
+        { sectionId: "voting-speaker-section",  btnId: "voting-speak-btn", statusId: "voting-speaker-status" }
+      ];
 
-      sortedMotions.forEach(([key, m], idx) => {
-        csv.push("");
-        csv.push(`"Motion ${idx+1}: ${m.type||""} (${m.result||""})"`);
-        csv.push('"Delegate Phone","Name","Vote"');
+      sections.forEach(({ sectionId, btnId, statusId }) => {
+        const section  = document.getElementById(sectionId);
+        const btn      = document.getElementById(btnId);
+        const statusEl = document.getElementById(statusId);
+        if (!section) return;
 
-        const votes = m.votes || {};
-        Object.entries(votes).forEach(([phone, vote]) => {
-          const name = delegates[phone]?.name || `Delegate ${phone.slice(-4)}`;
-          csv.push(`"${phone}","${name}","${vote}"`);
-        });
+        if (!speakerListOpen) {
+          section.style.display = "none";
+          return;
+        }
+
+        section.style.display = "block";
+
+        if (myQueuePosition !== null) {
+          btn.textContent = `🎙 In Queue — #${myQueuePosition}`;
+          btn.classList.add("in-queue");
+          btn.disabled    = true;
+          statusEl.textContent = `You are #${myQueuePosition} in the speaker's list.`;
+        } else {
+          btn.textContent = "🎙 Request to Speak";
+          btn.classList.remove("in-queue");
+          btn.disabled    = false;
+          statusEl.textContent = "Click to add yourself to the speaker's list.";
+        }
       });
+    }
 
-      // ── Trigger download ──
-      const blob = new Blob([csv.join("\n")], { type: "text/csv;charset=utf-8;" });
-      const url  = URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      const filename = `MUN_${committee.replace(/\s+/g,"_")}_Report_${new Date().toISOString().slice(0,10)}.csv`;
-      link.href     = url;
-      link.download = filename;
-      link.click();
-      URL.revokeObjectURL(url);
+    /* ════════════════════════════════════════════════════════
+       NEW: REQUEST TO SPEAK
+       Adds delegate to speakerList/{committee} with next order index
+    ════════════════════════════════════════════════════════ */
+    window.requestToSpeak = async function () {
+      if (!currentPhone || !speakerListOpen || myQueuePosition !== null) return;
+
+      // Get current queue to determine next order index
+      const snap  = await get(ref(db, `speakerList/${currentCommittee}`));
+      const queue = snap.val() || {};
+      const existing = Object.values(queue);
+
+      // Check if already in queue (safety check)
+      if (existing.find(e => e.phone === currentPhone)) return;
+
+      const nextOrder = existing.length > 0
+        ? Math.max(...existing.map(e => e.order || 0)) + 1
+        : 1;
+
+      // Push new speaker entry
+      await push(ref(db, `speakerList/${currentCommittee}`), {
+        phone:     currentPhone,
+        name:      currentName,
+        order:     nextOrder,
+        timestamp: Date.now()
+      });
     };
 
+    /* ════════════════════════════════════════════════════════
+       ROLL CALL
+    ════════════════════════════════════════════════════════ */
+    window.markPresence = async function (val) {
+      if (!currentPhone || hasMarkedRC) return;
+      await update(ref(db, `delegates/${currentCommittee}/${currentPhone}`), { presence: val });
+      hasMarkedRC = true;
+
+      document.getElementById("rc-status").style.display = "block";
+      document.getElementById("rc-present").disabled = true;
+      document.getElementById("rc-present-voting").disabled = true;
+      document.getElementById(val === "present" ? "rc-present" : "rc-present-voting").classList.add("selected");
+    };
+
+    /* ════════════════════════════════════════════════════════
+       VOTING
+    ════════════════════════════════════════════════════════ */
+    window.castVote = async function (val) {
+      if (!currentPhone || hasVoted) return;
+      await update(ref(db, `delegates/${currentCommittee}/${currentPhone}`), { vote: val });
+      hasVoted = true;
+
+      document.getElementById("vote-status").textContent = "Vote recorded. Await the result.";
+      document.querySelectorAll(".vote-btn").forEach(b => {
+        b.disabled = true;
+        if ((b.classList.contains("yes") && val === "yes") ||
+            (b.classList.contains("no")  && val === "no")  ||
+            (b.classList.contains("abs") && val === "abstain")) {
+          b.classList.add("selected");
+        }
+      });
+    };
   </script>
 </body>
 </html>
